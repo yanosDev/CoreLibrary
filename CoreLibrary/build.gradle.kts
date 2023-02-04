@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "de.yanos.mylibrary"
+    namespace = "de.yanos.corelibrary"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
