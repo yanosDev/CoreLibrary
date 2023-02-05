@@ -1,7 +1,12 @@
+@file:Suppress("UnstableApiUsage")
+
+import org.gradle.api.publish.PublishingExtension
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    id(libs.plugins.mavenPublish.get().pluginId)
 }
 
 android {
@@ -14,6 +19,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        aarMetadata {
+            minCompileSdk = libs.versions.compileSdk.get().toInt()
+        }
     }
 
     buildTypes {
@@ -28,6 +37,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    testFixtures {
+        enable = true
     }
 }
 
@@ -56,4 +68,18 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "de.yanos"
+            artifactId = "corelibrary"
+            version = "0.1.2"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
