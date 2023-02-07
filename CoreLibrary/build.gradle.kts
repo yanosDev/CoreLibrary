@@ -1,7 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import org.gradle.api.publish.PublishingExtension
-
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.androidLibrary)
@@ -81,7 +79,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
             artifactId = "corelibrary"
-            version = "0.1.8"
+            version = "0.1.9"
 
             afterEvaluate {
                 from(components["release"])
