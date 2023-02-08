@@ -7,8 +7,6 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -17,8 +15,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import androidx.window.layout.DisplayFeature
-import androidx.window.layout.FoldingFeature
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import de.yanos.core.utils.*
 import de.yanos.corelibrary.R
@@ -166,33 +162,6 @@ fun AppTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable (ScreenConfig) -> Unit
 ) {
-    val windowSize = calculateWindowSizeClass(activity)
-    val foldingFeature = calculateDisplayFeatures(activity).filterIsInstance<FoldingFeature>().firstOrNull()
-    val foldingDevicePosture = when {
-        isBookPosture(foldingFeature) ->
-            DevicePosture.BookPosture(foldingFeature.bounds)
-
-        isSeparating(foldingFeature) ->
-            DevicePosture.Separating(foldingFeature.bounds, foldingFeature.orientation)
-
-        else -> DevicePosture.NormalPosture
-    }
-
-    val config = when {
-        windowSize.widthSizeClass == WindowWidthSizeClass.Compact -> ScreenConfig(NavigationType.BOTTOM, ContentType.SINGLE)
-        windowSize.widthSizeClass == WindowWidthSizeClass.Medium && foldingDevicePosture != DevicePosture.NormalPosture -> ScreenConfig(
-            NavigationType.RAIL,
-            ContentType.DUAL
-        )
-        windowSize.widthSizeClass == WindowWidthSizeClass.Medium -> ScreenConfig(NavigationType.RAIL, ContentType.SINGLE)
-        windowSize.widthSizeClass == WindowWidthSizeClass.Expanded && foldingDevicePosture is DevicePosture.BookPosture -> ScreenConfig(
-            NavigationType.RAIL,
-            ContentType.DUAL
-        )
-        windowSize.widthSizeClass == WindowWidthSizeClass.Expanded -> ScreenConfig(NavigationType.DRAWER, ContentType.DUAL)
-        else -> ScreenConfig(NavigationType.BOTTOM, ContentType.SINGLE)
-    }
-
     @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
     val colors =
         if (useDarkTheme) {
@@ -206,6 +175,6 @@ fun AppTheme(
     MaterialTheme(
         colorScheme = colors,
         typography = typography,
-        content = { content(config) },
+        content = { content(ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity))) },
     )
 }

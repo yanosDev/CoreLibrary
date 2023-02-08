@@ -48,23 +48,23 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
+
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
-
+    implementation(libs.androidx.compose.materialWindow)
+    implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation(libs.androidx.compose.materialWindow)
-    implementation(libs.androidx.compose.material.iconsExtended)
-
     implementation("androidx.compose.material3:material3:1.1.0-alpha05")
-    implementation("com.google.accompanist:accompanist-adaptive:0.26.2-beta")
+    implementation("com.google.accompanist:accompanist-adaptive:0.29.1-alpha")
 
-    implementation(libs.androidx.core.ktx)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
@@ -79,7 +79,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
             artifactId = "corelibrary"
-            version = "0.1.9"
+            version = "0.1.10"
 
             afterEvaluate {
                 from(components["release"])
