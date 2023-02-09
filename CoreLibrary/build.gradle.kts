@@ -50,6 +50,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
 
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
@@ -62,7 +63,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation("androidx.compose.material3:material3:1.1.0-alpha05")
+    implementation("androidx.compose.material3:material3:1.1.0-alpha06")
     implementation("com.google.accompanist:accompanist-adaptive:0.29.1-alpha")
 
     androidTestImplementation(libs.junit)
