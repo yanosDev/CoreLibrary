@@ -4,9 +4,6 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,12 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import de.yanos.core.ui.theme.AppTheme
@@ -30,8 +24,6 @@ import de.yanos.core.utils.NavigationDestination
 import de.yanos.core.utils.NavigationType
 import de.yanos.core.utils.ScreenConfig
 import de.yanos.corelibrary.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class TestActivity : ComponentActivity() {
@@ -56,7 +48,7 @@ private fun ContentTest(
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val selectedDestination = navBackStackEntry?.destination?.route ?: TestRoutes.ONE
+    val currentRoute = navBackStackEntry?.destination?.route ?: TestRoutes.ONE
     val navigationAction = remember(navController) { NavigationActions(navController) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
@@ -64,25 +56,28 @@ private fun ContentTest(
         PermanentNavigationDrawer(drawerContent = {
             PermanentNavigationDrawerContent(
                 config = config,
-                selectedDestination = selectedDestination,
+                route = currentRoute,
                 navigateToTopLevelDestination = navigationAction::navigateTo,
             )
         }) {
 
         }
     } else {
-        ModalNavigationDrawer(drawerContent = {
-            ModalNavigationDrawerContent(
-                config = config,
-                selectedDestination = selectedDestination,
-                navigateToTopLevelDestination = navigationAction::navigateTo,
-                onDrawerClicked = {
-                    scope.launch {
-                        drawerState.close()
+        ModalNavigationDrawer(
+            drawerContent = {
+                ModalNavigationDrawerContent(
+                    config = config,
+                    route = currentRoute,
+                    navigateToTopLevelDestination = navigationAction::navigateTo,
+                    onDrawerClicked = {
+                        scope.launch {
+                            drawerState.close()
+                        }
                     }
-                }
-            )
-        }) {
+                )
+            },
+            drawerState = drawerState
+        ) {
 
         }
     }
@@ -91,18 +86,18 @@ private fun ContentTest(
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun ModalNavigationDrawerContent(
-    selectedDestination: String,
+    route: String,
     config: ScreenConfig = ScreenConfig(WindowSizeClass.calculateFromSize(DpSize.Unspecified), listOf()),
     navigateToTopLevelDestination: (NavigationDestination) -> Unit,
     onDrawerClicked: () -> Unit = {}
 ) {
-    TODO("Not yet implemented")
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun PermanentNavigationDrawerContent(
-    selectedDestination: String,
+    route: String,
     config: ScreenConfig = ScreenConfig(WindowSizeClass.calculateFromSize(DpSize.Unspecified), listOf()),
     navigateToTopLevelDestination: (NavigationDestination) -> Unit,
 ) {
