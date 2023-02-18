@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="de.yanos.core">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="de.yanos.core">
 
-    <application>
+    <application
+        android:name=".TestApp"
+        android:label="@string/app_name"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher">
         <activity
+            android:name=".TestActivity"
             android:allowBackup="true"
-            android:name="de.yanos.core.TestActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Core">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

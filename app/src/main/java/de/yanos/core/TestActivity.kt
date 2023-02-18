@@ -1,14 +1,13 @@
 package de.yanos.core
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -17,12 +16,11 @@ import androidx.navigation.compose.rememberNavController
 import de.yanos.core.ui.theme.AppTheme
 import de.yanos.core.ui.view.DynamicNavigationScreen
 import de.yanos.core.utils.NavigationDestination
-import de.yanos.core.utils.ScreenConfig
 import de.yanos.corelibrary.R
 
 class TestActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         Log.e("Hi", "Sonay")
         setContent {
             AppTheme(activity = this) { config ->
@@ -32,8 +30,6 @@ class TestActivity : ComponentActivity() {
                     TestNavHost(
                         modifier = modifier,
                         startRoute = TEST_DESTINATIONS.first().route,
-                        config = config,
-                        testDestinations = TEST_DESTINATIONS,
                         navController = navController
                     )
                 }
@@ -46,8 +42,6 @@ class TestActivity : ComponentActivity() {
 private fun TestNavHost(
     modifier: Modifier = Modifier,
     startRoute: String,
-    config: ScreenConfig,
-    testDestinations: List<NavigationDestination.TopDestination>,
     navController: NavHostController
 ) {
     NavHost(
