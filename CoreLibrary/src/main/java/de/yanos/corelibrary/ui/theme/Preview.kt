@@ -1,4 +1,4 @@
-package de.yanos.core.ui.theme
+package de.yanos.corelibrary.ui.theme
 
 import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Devices

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_inbox">Inbox</string>
+    <string name="tab_note">Notes</string>
+    <string name="tab_conversation">Conversations</string>
+    <string name="tab_settings">Settings</string>
+</resources>

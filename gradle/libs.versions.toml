@@ -4,7 +4,7 @@
 #####
 [versions]
 accompanist = "0.28.0"
-androidGradlePlugin = "7.4.0"
+androidGradlePlugin = "7.4.1"
 androidx-activity-compose = "1.6.1"
 androidx-appcompat = "1.6.0"
 androidx-benchmark = "1.1.0"
@@ -30,7 +30,7 @@ compileSdk = "33"
 compose-compiler = "1.4.0"
 compose-snapshot = "-"
 coroutines = "1.6.4"
-coreLibrary = "0.1.11"
+coreLibrary = "0.1.13"
 google-maps = "18.1.0"
 hilt = "2.43.2"
 hiltExt = "1.0.0"

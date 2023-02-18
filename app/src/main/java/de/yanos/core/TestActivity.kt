@@ -2,6 +2,7 @@ package de.yanos.core
 
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.icons.Icons
@@ -13,12 +14,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import de.yanos.core.ui.theme.AppTheme
+import de.yanos.core.ui.view.DynamicNavigationScreen
+import de.yanos.core.utils.NavigationDestination
+import de.yanos.core.utils.ScreenConfig
 import de.yanos.corelibrary.R
-/*
 
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
+        Log.e("Hi", "Sonay")
         setContent {
             AppTheme(activity = this) { config ->
                 val navController = rememberNavController()
@@ -97,4 +102,4 @@ private val TEST_DESTINATIONS = listOf(
         unselectedIcon = Icons.Default.Settings,
         iconTextId = R.string.tab_settings
     ),
-)*/
+)

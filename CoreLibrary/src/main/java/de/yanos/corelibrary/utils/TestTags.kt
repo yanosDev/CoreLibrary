@@ -1,4 +1,4 @@
-package de.yanos.core.utils
+package de.yanos.corelibrary.utils
 
 import androidx.annotation.StringDef
 

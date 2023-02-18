@@ -1,4 +1,4 @@
-package de.yanos.core.utils
+package de.yanos.corelibrary.utils
 
 import android.graphics.Rect
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass

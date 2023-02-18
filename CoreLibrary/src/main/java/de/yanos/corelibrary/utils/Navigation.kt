@@ -1,4 +1,4 @@
-package de.yanos.core.utils
+package de.yanos.corelibrary.utils
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination

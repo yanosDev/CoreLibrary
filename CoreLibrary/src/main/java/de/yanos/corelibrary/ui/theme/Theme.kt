@@ -1,4 +1,4 @@
-package de.yanos.core.ui.theme
+package de.yanos.corelibrary.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import de.yanos.core.utils.*
 import de.yanos.corelibrary.R
+import de.yanos.corelibrary.utils.ScreenConfig
 
 val Montserrat = FontFamily(
     Font(R.font.montserrat_medium, FontWeight.Medium),

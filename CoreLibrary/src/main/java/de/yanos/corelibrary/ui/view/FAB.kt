@@ -1,4 +1,4 @@
-package de.yanos.core.ui.view
+package de.yanos.corelibrary.ui.view
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import de.yanos.core.utils.TAG_FAB
+import de.yanos.corelibrary.utils.TAG_FAB
 import de.yanos.corelibrary.R
 
 @Composable

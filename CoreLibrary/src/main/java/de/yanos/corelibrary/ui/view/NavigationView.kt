@@ -1,4 +1,4 @@
-package de.yanos.core.ui.view
+package de.yanos.corelibrary.ui.view
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -29,6 +29,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import de.yanos.core.utils.*
 import de.yanos.corelibrary.R
+import de.yanos.corelibrary.utils.*
 import kotlinx.coroutines.launch
 
 @Composable
