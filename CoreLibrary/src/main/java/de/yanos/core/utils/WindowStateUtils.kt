@@ -1,6 +1,7 @@
 package de.yanos.core.utils
 
 import android.graphics.Rect
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.window.layout.DisplayFeature
@@ -10,6 +11,10 @@ import kotlin.contracts.contract
 
 enum class ContentType {
     SINGLE, DUAL
+}
+
+enum class ContentPosition {
+    TOP, CENTER
 }
 
 enum class NavigationType {
@@ -22,6 +27,7 @@ data class ScreenConfig(
 ) {
     val navigationType: NavigationType
     val contentType: ContentType
+    val contentPosition: ContentPosition
 
     init {
         val foldingFeature = displayFeatures.filterIsInstance<FoldingFeature>().firstOrNull()
@@ -35,17 +41,28 @@ data class ScreenConfig(
 
             else -> DevicePosture.NormalPosture
         }
-
-        val config = when {
+        contentPosition = when (windowSize.heightSizeClass) {
+            WindowHeightSizeClass.Compact -> ContentPosition.TOP
+            WindowHeightSizeClass.Medium, WindowHeightSizeClass.Expanded -> ContentPosition.CENTER
+            else -> ContentPosition.TOP
+        }
+        when {
             windowSize.widthSizeClass == WindowWidthSizeClass.Compact -> Pair(NavigationType.BOTTOM, ContentType.SINGLE)
-            windowSize.widthSizeClass == WindowWidthSizeClass.Medium && foldingDevicePosture != DevicePosture.NormalPosture -> Pair(NavigationType.RAIL, ContentType.DUAL)
+            windowSize.widthSizeClass == WindowWidthSizeClass.Medium && foldingDevicePosture != DevicePosture.NormalPosture -> Pair(
+                NavigationType.RAIL,
+                ContentType.DUAL
+            )
             windowSize.widthSizeClass == WindowWidthSizeClass.Medium -> Pair(NavigationType.RAIL, ContentType.SINGLE)
-            windowSize.widthSizeClass == WindowWidthSizeClass.Expanded && foldingDevicePosture is DevicePosture.BookPosture -> Pair(NavigationType.RAIL, ContentType.DUAL)
+            windowSize.widthSizeClass == WindowWidthSizeClass.Expanded && foldingDevicePosture is DevicePosture.BookPosture -> Pair(
+                NavigationType.RAIL,
+                ContentType.DUAL
+            )
             windowSize.widthSizeClass == WindowWidthSizeClass.Expanded -> Pair(NavigationType.DRAWER, ContentType.DUAL)
             else -> Pair(NavigationType.BOTTOM, ContentType.SINGLE)
+        }.let { (navigation, content) ->
+            navigationType = navigation
+            contentType = content
         }
-        navigationType = config.first
-        contentType = config.second
     }
 }
 

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Notes</string>
+
+    <string name="fab_add_note">Neue Notiz</string>
     <string name="tab_inbox">Inbox</string>
     <string name="tab_note">Notes</string>
     <string name="tab_conversation">Conversations</string>

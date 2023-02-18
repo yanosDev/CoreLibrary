@@ -6,102 +6,24 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import de.yanos.core.ui.theme.AppTheme
-import de.yanos.core.utils.NavigationActions
-import de.yanos.core.utils.NavigationDestination
-import de.yanos.core.utils.NavigationType
-import de.yanos.core.utils.ScreenConfig
+import de.yanos.core.ui.view.DynamicNavigationScreen
+import de.yanos.core.utils.*
 import de.yanos.corelibrary.R
-import kotlinx.coroutines.launch
 
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
         setContent {
             AppTheme(activity = this) { config ->
-                ContentTest(config = config)
+                val navController = rememberNavController()
+                DynamicNavigationScreen(config = config, destinations = TEST_DESTINATIONS, navController = navController) {
+                    
+                }
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Preview
-@Composable
-private fun ContentTest(
-    modifier: Modifier = Modifier,
-    extras: Bundle? = Bundle(),
-    config: ScreenConfig = ScreenConfig(WindowSizeClass.calculateFromSize(DpSize.Unspecified), listOf())
-) {
-    val scope = rememberCoroutineScope()
-    val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: TestRoutes.ONE
-    val navigationAction = remember(navController) { NavigationActions(navController) }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-
-    if (config.navigationType == NavigationType.DRAWER) {
-        PermanentNavigationDrawer(drawerContent = {
-            PermanentNavigationDrawerContent(
-                config = config,
-                route = currentRoute,
-                navigateToTopLevelDestination = navigationAction::navigateTo,
-            )
-        }) {
-
-        }
-    } else {
-        ModalNavigationDrawer(
-            drawerContent = {
-                ModalNavigationDrawerContent(
-                    config = config,
-                    route = currentRoute,
-                    navigateToTopLevelDestination = navigationAction::navigateTo,
-                    onDrawerClicked = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                    }
-                )
-            },
-            drawerState = drawerState
-        ) {
-
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Composable
-fun ModalNavigationDrawerContent(
-    route: String,
-    config: ScreenConfig = ScreenConfig(WindowSizeClass.calculateFromSize(DpSize.Unspecified), listOf()),
-    navigateToTopLevelDestination: (NavigationDestination) -> Unit,
-    onDrawerClicked: () -> Unit = {}
-) {
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
-@Composable
-fun PermanentNavigationDrawerContent(
-    route: String,
-    config: ScreenConfig = ScreenConfig(WindowSizeClass.calculateFromSize(DpSize.Unspecified), listOf()),
-    navigateToTopLevelDestination: (NavigationDestination) -> Unit,
-) {
-
 }
 
 object TestRoutes {
