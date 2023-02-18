@@ -1,4 +1,5 @@
 package de.yanos.core
+/*
 
 import android.os.Bundle
 import android.util.Log
@@ -100,3 +101,4 @@ private val TEST_DESTINATIONS = listOf(
         iconTextId = R.string.tab_settings
     ),
 )
+*/
