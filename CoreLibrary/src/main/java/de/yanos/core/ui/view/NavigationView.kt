@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MenuOpen
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -25,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import de.yanos.core.TEST_DESTINATIONS
 import de.yanos.core.utils.*
 import de.yanos.corelibrary.R
 import kotlinx.coroutines.launch
@@ -36,7 +37,7 @@ fun DynamicNavigationScreen(
     config: ScreenConfig,
     destinations: List<NavigationDestination.TopDestination>,
     navController: NavHostController,
-    content: @Composable () -> Unit,
+    content: @Composable (Modifier) -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: destinations.first().route
@@ -46,6 +47,7 @@ fun DynamicNavigationScreen(
 
     if (config.navigationType == NavigationType.DRAWER) {
         PermanentNavigationDrawer(
+            modifier = modifier,
             drawerContent = {
                 PermanentNavigationDrawerContent(
                     config = config,
@@ -58,6 +60,7 @@ fun DynamicNavigationScreen(
                 DynamicContent(
                     config = config,
                     route = currentRoute,
+                    destinations = destinations,
                     navigateToTopLevelDestination = navigationAction::navigateTo,
                     content = content
                 )
@@ -71,6 +74,7 @@ fun DynamicNavigationScreen(
             Unit
         }
         ModalNavigationDrawer(
+            modifier = modifier,
             drawerContent = {
                 ModalNavigationDrawerContent(
                     config = config,
@@ -85,6 +89,7 @@ fun DynamicNavigationScreen(
                 DynamicContent(
                     config = config,
                     route = currentRoute,
+                    destinations = destinations,
                     onDrawerClicked = drawerClickListener,
                     navigateToTopLevelDestination = navigationAction::navigateTo,
                     content = content
@@ -99,15 +104,18 @@ fun DynamicContent(
     modifier: Modifier = Modifier,
     config: ScreenConfig,
     route: String,
+    destinations: List<NavigationDestination.TopDestination>,
     onDrawerClicked: () -> Unit = {},
     navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable (Modifier) -> Unit
 ) {
     Row(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(visible = config.navigationType == NavigationType.RAIL) {
             DynamicRail(
-                selectedDestination = route,
+                route = route,
                 config = config,
+                destinations = destinations,
+                navigateToTopLevelDestination = navigateToTopLevelDestination,
                 onDrawerClicked = onDrawerClicked,
             )
         }
@@ -116,10 +124,11 @@ fun DynamicContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.inverseOnSurface)
         ) {
-            content()
+            content(Modifier.weight(1f))
             AnimatedVisibility(visible = config.navigationType == NavigationType.BOTTOM) {
                 DynamicBottomBar(
-                    selectedDestination = route,
+                    route = route,
+                    destinations = destinations,
                     navigateToTopLevelDestination = navigateToTopLevelDestination
                 )
             }
@@ -128,21 +137,104 @@ fun DynamicContent(
 }
 
 @Composable
-fun DynamicBottomBar(selectedDestination: String, navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit) {
-
+fun DynamicBottomBar(
+    modifier: Modifier = Modifier,
+    route: String,
+    destinations: List<NavigationDestination.TopDestination>,
+    navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit
+) {
+    NavigationBar(modifier = modifier.fillMaxWidth()) {
+        destinations.forEach { destination ->
+            NavigationBarItem(
+                selected = route == destination.route,
+                onClick = { navigateToTopLevelDestination(destination) },
+                icon = {
+                    Icon(
+                        imageVector = destination.selectedIcon,
+                        contentDescription = stringResource(id = destination.iconTextId)
+                    )
+                }
+            )
+        }
+    }
 }
 
 @Composable
-fun DynamicRail(selectedDestination: String, config: ScreenConfig, onDrawerClicked: () -> Unit) {
+fun DynamicRail(
+    modifier: Modifier = Modifier,
+    config: ScreenConfig, onDrawerClicked: () -> Unit,
+    route: String,
+    destinations: List<NavigationDestination.TopDestination>,
+    navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit,
+) {
+    NavigationRail(
+        modifier = modifier.fillMaxHeight(),
+        containerColor = MaterialTheme.colorScheme.inverseOnSurface
+    ) {
+        Layout(
+            modifier = Modifier.widthIn(max = 80.dp),
+            content = {
+                Column(
+                    modifier = Modifier.layoutId(LayoutType.HEADER),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    NavigationRailItem(
+                        selected = false,
+                        onClick = onDrawerClicked,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = stringResource(id = R.string.d_nav_drawer)
+                            )
+                        }
+                    )
+                    FloatingActionButton(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier.padding(top = 8.dp, bottom = 32.dp),
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(id = R.string.d_edit),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp)) // NavigationRailHeaderPadding
+                    Spacer(Modifier.height(4.dp)) // NavigationRailVerticalPadding
+                }
 
+                Column(
+                    modifier = Modifier.layoutId(LayoutType.CONTENT),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    destinations.forEach { destination ->
+                        NavigationRailItem(
+                            selected = route == destination.route,
+                            onClick = { navigateToTopLevelDestination(destination) },
+                            icon = {
+                                Icon(
+                                    imageVector = destination.selectedIcon,
+                                    contentDescription = stringResource(id = destination.iconTextId)
+                                )
+                            }
+                        )
+                    }
+                }
+            },
+            measurePolicy = { m, c -> measurePolicy(config = config, measurableList = m, constraints = c) }
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 private fun PermanentNavigationDrawerContent(
     modifier: Modifier = Modifier,
     config: ScreenConfig = ScreenConfig(WindowSizeClass.calculateFromSize(DpSize.Unspecified), listOf()),
-    route: String = TEST_DESTINATIONS.first().route,
+    route: String,
     destinations: List<NavigationDestination.TopDestination>,
     navigateToTopLevelDestination: (NavigationDestination) -> Unit,
 ) {
