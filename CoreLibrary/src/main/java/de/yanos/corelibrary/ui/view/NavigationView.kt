@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import de.yanos.core.utils.*
 import de.yanos.corelibrary.R
 import de.yanos.corelibrary.utils.*
 import kotlinx.coroutines.launch
@@ -253,7 +252,7 @@ private fun PermanentNavigationDrawerContent(
                     Text(
                         modifier = Modifier
                             .padding(16.dp),
-                        text = stringResource(id = R.string.app_name).uppercase(),
+                        text = stringResource(id = R.string.app_name),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -341,7 +340,14 @@ private fun DrawerItems(
         destinations.forEach { destination ->
             NavigationDrawerItem(
                 selected = route == destination.route,
-                label = { Text(text = stringResource(id = destination.iconTextId), modifier = Modifier.padding(horizontal = 16.dp)) },
+                label = {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        text = stringResource(id = destination.iconTextId),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
                 icon = { Icon(imageVector = destination.selectedIcon, contentDescription = stringResource(id = destination.iconTextId)) },
                 colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent),
                 onClick = { navigateToTopLevelDestination(destination) }

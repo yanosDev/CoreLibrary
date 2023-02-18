@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.adaptive.calculateDisplayFeatures
-import de.yanos.core.utils.*
 import de.yanos.corelibrary.R
 import de.yanos.corelibrary.utils.ScreenConfig
 
