@@ -80,7 +80,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
             artifactId = "corelibrary"
-            version = "0.1.15"
+            version = "0.1.16"
 
             afterEvaluate {
                 from(components["release"])
