@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "de.yanos.firestorewrapper"
+    namespace = "de.yanos.crashlog"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -22,8 +22,6 @@ android {
             minCompileSdk = libs.versions.compileSdk.get().toInt()
         }
     }
-
-
 
     buildTypes {
         getByName("release") {
@@ -47,17 +45,15 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     val firebaseBom = platform(libs.firebase.bom)
     implementation(firebaseBom)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.auth)
-
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.timber)
 }
 
 publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
-            artifactId = "firestorewrapper"
+            artifactId = "crashlog"
             version = "0.1.0"
 
             afterEvaluate {

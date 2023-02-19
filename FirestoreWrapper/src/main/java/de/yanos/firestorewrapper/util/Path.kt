@@ -1,6 +1,6 @@
 package de.yanos.firestorewrapper.util
 
-interface FirestorePath<T> {
+interface DatabasePath<T> {
     val id: String
     val path: List<String>
     val conditions: MutableList<Condition>
@@ -9,12 +9,12 @@ interface FirestorePath<T> {
     fun isCollectionRequest(): Boolean
 }
 
-internal data class FirestorePathImpl<T>(
+internal data class DatabasePathImpl<T>(
     override val path: List<String>,
     override val conditions: MutableList<Condition>,
     override val clazz: Class<T>
 ) :
-    FirestorePath<T> {
+    DatabasePath<T> {
     override val id
         get() =
             "${path.joinToString(separator = "/")} ${
@@ -24,12 +24,12 @@ internal data class FirestorePathImpl<T>(
     override fun isCollectionRequest(): Boolean = !isDocumentRequest()
 }
 
-sealed interface FirestorePathBuilder<T> {
+sealed interface DatabasePathBuilder<T> {
     val paths: MutableList<String>
     val conditions: MutableList<Condition>
     val clazz: Class<T>
-    fun build(): FirestorePath<T> {
-        return FirestorePathImpl(paths, conditions, clazz)
+    fun build(): DatabasePath<T> {
+        return DatabasePathImpl(paths, conditions, clazz)
     }
 
     companion object {
@@ -39,16 +39,16 @@ sealed interface FirestorePathBuilder<T> {
     }
 }
 
-interface DocumentPathBuilder<T> : FirestorePathBuilder<T> {
+interface DocumentPathBuilder<T> : DatabasePathBuilder<T> {
     fun collection(path: String): CollectionPathBuilder<T>
 }
 
-interface CollectionPathBuilder<T> : FirestorePathBuilder<T> {
+interface CollectionPathBuilder<T> : DatabasePathBuilder<T> {
     fun document(path: String): DocumentPathBuilder<T>
     fun condition(condition: Condition): QueryPathBuilder<T>
 }
 
-interface QueryPathBuilder<T> : FirestorePathBuilder<T> {
+interface QueryPathBuilder<T> : DatabasePathBuilder<T> {
     fun condition(condition: Condition): QueryPathBuilder<T>
 }
 

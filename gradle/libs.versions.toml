@@ -31,6 +31,7 @@ compose-compiler = "1.4.2"
 compose-snapshot = "-"
 coreLibrary = "0.1.14"
 coroutines = "1.6.4"
+crashlytics = "2.9.4"
 google-maps = "18.1.0"
 firebase-bom = "31.2.2"
 hilt = "2.43.2"
@@ -50,6 +51,7 @@ room = "2.5.0"
 secrets = "2.0.1"
 # @keep
 targetSdk = "33"
+timber-version = "5.0.1"
 versionCatalog = "0.7.0"
 
 [libraries]
@@ -111,12 +113,13 @@ androidx-window = { module = "androidx.window:window", version.ref = "androidx-w
 coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdkDesugar" }
 coreLibrary = { module = "com.github.yanosDev:CoreLibrary", version.ref = "coreLibrary" }
+crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "crashlytics" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 googlemaps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 googlemaps-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "google-maps" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics-buildtools = { module = "com.google.firebase:firebase-crashlytics-buildtools" }
-firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ndk" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
@@ -135,11 +138,13 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 rometools-modules = { module = "com.rometools:rome-modules", version.ref = "rome" }
 rometools-rome = { module = "com.rometools:rome", version.ref = "rome" }
 secrets-gradlePlugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secrets" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber-version" }
 
 [plugins]
 android = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 benManes = { id = "com.github.ben-manes.versions", version.ref = "benManes" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

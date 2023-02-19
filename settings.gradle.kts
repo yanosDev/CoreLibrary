@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+include(":CrashLog")
+
+
 val snapshotVersion: String? = System.getenv("COMPOSE_SNAPSHOT_ID")
 
 pluginManagement {

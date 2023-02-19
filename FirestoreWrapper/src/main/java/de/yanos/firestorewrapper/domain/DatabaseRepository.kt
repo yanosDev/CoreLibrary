@@ -3,7 +3,7 @@ package de.yanos.firestorewrapper.domain
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
 import de.yanos.firestorewrapper.util.Condition
-import de.yanos.firestorewrapper.util.FirestorePath
+import de.yanos.firestorewrapper.util.DatabasePath
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -13,22 +13,22 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-data class FirestoreConfig(var isPersistenceEnabled: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
+data class DatabaseConfig(var isPersistenceEnabled: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
 
-interface FirestoreRepositoryBuilder {
+interface DatabaseRepositoryBuilder {
     fun enableOfflinePersistence()
     fun disableOfflinePersistence()
-    fun build(): FirestoreRepository
+    fun build(): DatabaseRepository
 
     companion object {
-        fun Builder(): FirestoreRepositoryBuilder {
-            return FirestoreRepositoryBuilderImpl()
+        fun Builder(): DatabaseRepositoryBuilder {
+            return DatabaseRepositoryBuilderImpl()
         }
     }
 }
 
-internal class FirestoreRepositoryBuilderImpl : FirestoreRepositoryBuilder {
-    private val config = FirestoreConfig()
+internal class DatabaseRepositoryBuilderImpl : DatabaseRepositoryBuilder {
+    private val config = DatabaseConfig()
 
     override fun enableOfflinePersistence() {
         config.isPersistenceEnabled = true
@@ -38,22 +38,22 @@ internal class FirestoreRepositoryBuilderImpl : FirestoreRepositoryBuilder {
         config.isPersistenceEnabled = false
     }
 
-    override fun build(): FirestoreRepository {
-        return FirestoreRepositoryImpl(config)
+    override fun build(): DatabaseRepository {
+        return DatabaseRepositoryImpl(config)
     }
 }
 
-interface FirestoreRepository {
-    suspend fun <T> create(path: FirestorePath<T>, values: Map<String, Any>): StoreResult<T>
-    suspend fun <T> read(path: FirestorePath<T>): StoreResult<T>
-    suspend fun <T> readList(path: FirestorePath<T>): StoreResult<List<T>>
-    suspend fun <T> subscribe(path: FirestorePath<T>): Flow<StoreResult<T>>
-    suspend fun <T> subscribeList(path: FirestorePath<T>): Flow<StoreResult<List<T>>>
-    suspend fun <T> update(path: FirestorePath<T>, values: Map<String, Any>): StoreResult<T>
-    suspend fun <T> delete(path: FirestorePath<T>): StoreResult<T>
+interface DatabaseRepository {
+    suspend fun <T> create(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T>
+    suspend fun <T> read(path: DatabasePath<T>): StoreResult<T>
+    suspend fun <T> readList(path: DatabasePath<T>): StoreResult<List<T>>
+    suspend fun <T> subscribe(path: DatabasePath<T>): Flow<StoreResult<T>>
+    suspend fun <T> subscribeList(path: DatabasePath<T>): Flow<StoreResult<List<T>>>
+    suspend fun <T> update(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T>
+    suspend fun <T> delete(path: DatabasePath<T>): StoreResult<T>
 }
 
-internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepository {
+internal class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseRepository {
     private val store: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val dispatcher = config.dispatcher
 
@@ -64,7 +64,7 @@ internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepos
         store.firestoreSettings = settings
     }
 
-    override suspend fun <T> create(path: FirestorePath<T>, values: Map<String, Any>): StoreResult<T> {
+    override suspend fun <T> create(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T> {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
                 if (path.isCollectionRequest())
@@ -76,7 +76,7 @@ internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepos
         }
     }
 
-    override suspend fun <T> read(path: FirestorePath<T>): StoreResult<T> {
+    override suspend fun <T> read(path: DatabasePath<T>): StoreResult<T> {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
                 store.read(path)
@@ -93,7 +93,7 @@ internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepos
         }
     }
 
-    override suspend fun <T> readList(path: FirestorePath<T>): StoreResult<List<T>> {
+    override suspend fun <T> readList(path: DatabasePath<T>): StoreResult<List<T>> {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
                 store.readAll(path)
@@ -110,7 +110,7 @@ internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepos
         }
     }
 
-    override suspend fun <T> subscribe(path: FirestorePath<T>): Flow<StoreResult<T>> {
+    override suspend fun <T> subscribe(path: DatabasePath<T>): Flow<StoreResult<T>> {
         return withContext(dispatcher) {
             callbackFlow {
                 val subscriber = store.read(path).addSnapshotListener { snapshot, error ->
@@ -133,7 +133,7 @@ internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepos
         }
     }
 
-    override suspend fun <T> subscribeList(path: FirestorePath<T>): Flow<StoreResult<List<T>>> {
+    override suspend fun <T> subscribeList(path: DatabasePath<T>): Flow<StoreResult<List<T>>> {
         return withContext(dispatcher) {
             callbackFlow {
                 val subscriber = store.readAll(path).addSnapshotListener { snapshot, error ->
@@ -153,7 +153,7 @@ internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepos
         }
     }
 
-    override suspend fun <T> update(path: FirestorePath<T>, values: Map<String, Any>): StoreResult<T> {
+    override suspend fun <T> update(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T> {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
                 if (path.isCollectionRequest())
@@ -165,28 +165,30 @@ internal class FirestoreRepositoryImpl(config: FirestoreConfig) : FirestoreRepos
         }
     }
 
-    override suspend fun <T> delete(path: FirestorePath<T>): StoreResult<T> {
+    override suspend fun <T> delete(path: DatabasePath<T>): StoreResult<T> {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
                 if (path.isCollectionRequest())
                     cont.resume(StoreResult.Failure("The given path is wrong for a document"))
                 store.delete(path)
                     .addOnSuccessListener { cont.resume(StoreResult.Success) }
-                    .addOnFailureListener { cont.resume(StoreResult.Failure(it.localizedMessage)) }
+                    .addOnFailureListener {
+                        cont.resume(StoreResult.Failure(it.localizedMessage))
+                    }
             }
         }
     }
 }
 
-fun <T> FirebaseFirestore.create(path: FirestorePath<T>, values: Map<String, Any>): Task<Void> {
+fun <T> FirebaseFirestore.create(path: DatabasePath<T>, values: Map<String, Any>): Task<Void> {
     return document(path.buildPath()).set(values)
 }
 
-fun <T> FirebaseFirestore.read(path: FirestorePath<T>): DocumentReference {
+fun <T> FirebaseFirestore.read(path: DatabasePath<T>): DocumentReference {
     return document(path.buildPath())
 }
 
-fun <T> FirebaseFirestore.readAll(path: FirestorePath<T>): Query {
+fun <T> FirebaseFirestore.readAll(path: DatabasePath<T>): Query {
     return collection(path.buildPath()).buildConditions(path.conditions)
 }
 
@@ -205,15 +207,15 @@ fun Query.buildConditions(conditions: List<Condition>): Query {
     return query
 }
 
-fun <T> FirebaseFirestore.update(path: FirestorePath<T>, values: Map<String, Any>): Task<Void> {
+fun <T> FirebaseFirestore.update(path: DatabasePath<T>, values: Map<String, Any>): Task<Void> {
     return document(path.buildPath()).update(values)
 }
 
-fun <T> FirebaseFirestore.delete(path: FirestorePath<T>): Task<Void> {
+fun <T> FirebaseFirestore.delete(path: DatabasePath<T>): Task<Void> {
     return document(path.buildPath()).delete()
 }
 
-fun <T> FirestorePath<T>.buildPath(): String {
+fun <T> DatabasePath<T>.buildPath(): String {
     return path.joinToString(separator = "/")
 }
 
