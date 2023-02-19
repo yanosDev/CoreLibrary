@@ -1,17 +1,27 @@
 package de.yanos.firestorewrapper.util
 
-import de.yanos.firestorewrapper.domain.Condition
-
 interface FirestorePath<T> {
     val id: String
+    val path: List<String>
+    val conditions: MutableList<Condition>
+    val clazz: Class<T>
+    fun isDocumentRequest(): Boolean
+    fun isCollectionRequest(): Boolean
 }
 
-internal data class FirestorePathImpl<T>(val path: List<String>, val conditions: MutableList<Condition>, val clazz: Class<T>) : FirestorePath<T> {
+internal data class FirestorePathImpl<T>(
+    override val path: List<String>,
+    override val conditions: MutableList<Condition>,
+    override val clazz: Class<T>
+) :
+    FirestorePath<T> {
     override val id
         get() =
             "${path.joinToString(separator = "/")} ${
                 conditions.sortedBy { it.priority }.joinToString { condition -> condition.priority.toString() + condition.uniqueId }
             }"
+    override fun isDocumentRequest(): Boolean = path.size % 2 != 1
+    override fun isCollectionRequest(): Boolean = !isDocumentRequest()
 }
 
 sealed interface FirestorePathBuilder<T> {
@@ -24,7 +34,7 @@ sealed interface FirestorePathBuilder<T> {
 
     companion object {
         fun <T> Builder(clazz: Class<T>): CollectionPathBuilder<T> {
-            return CollectionPathBuilderImpl<T>(mutableListOf(), mutableListOf(), clazz)
+            return CollectionPathBuilderImpl(mutableListOf(), mutableListOf(), clazz)
         }
     }
 }

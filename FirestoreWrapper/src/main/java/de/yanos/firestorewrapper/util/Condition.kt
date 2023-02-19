@@ -1,4 +1,4 @@
-package de.yanos.firestorewrapper.domain
+package de.yanos.firestorewrapper.util
 
 sealed class Condition(open val priority: Int, val uniqueId: String) {
     class Limit(val count: Long) : Condition(0, count.toString())

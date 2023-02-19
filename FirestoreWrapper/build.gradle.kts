@@ -45,6 +45,11 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    val firebaseBom = platform(libs.firebase.bom)
+    implementation(firebaseBom)
+    implementation(libs.firebase.firestore)
+
+    implementation(libs.kotlinx.coroutines.android)
 }
 
 publishing {
