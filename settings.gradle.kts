@@ -1,10 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-include(":CrashLog")
-
-
 val snapshotVersion: String? = System.getenv("COMPOSE_SNAPSHOT_ID")
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -29,3 +25,4 @@ rootProject.name = "Core"
 include(":app")
 include(":CoreLibrary")
 include(":FirestoreWrapper")
+include(":CrashLog")
