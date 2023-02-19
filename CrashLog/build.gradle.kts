@@ -54,7 +54,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
             artifactId = "crashlog"
-            version = "0.1.0"
+            version = "0.1.17"
 
             afterEvaluate {
                 from(components["release"])
