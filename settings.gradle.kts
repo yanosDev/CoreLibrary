@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "Core"
 include(":app")
 include(":CoreLibrary")
+include(":FirestoreWrapper")

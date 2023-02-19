@@ -12,6 +12,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/CoreLibrary" />
+            <option value="$PROJECT_DIR$/FirestoreWrapper" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
