@@ -1,7 +1,11 @@
 package de.yanos.firestorewrapper.domain
 
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.Query
+import de.yanos.crashlog.util.Clog
 import de.yanos.firestorewrapper.util.Condition
 import de.yanos.firestorewrapper.util.DatabasePath
 import kotlinx.coroutines.CoroutineDispatcher
@@ -71,7 +75,10 @@ internal class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseReposito
                     cont.resume(StoreResult.Failure("The given path is wrong for"))
                 store.create(path, values)
                     .addOnSuccessListener { cont.resume(StoreResult.Success) }
-                    .addOnFailureListener { cont.resume(StoreResult.Failure(it.localizedMessage)) }
+                    .addOnFailureListener {
+                        Clog.e(it.stackTraceToString())
+                        cont.resume(StoreResult.Failure(it.localizedMessage))
+                    }
             }
         }
     }
@@ -88,7 +95,10 @@ internal class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseReposito
                             ?: StoreResult.Failure("Document not found")
                         )
                     }
-                    .addOnFailureListener { cont.resume(StoreResult.Failure(it.localizedMessage)) }
+                    .addOnFailureListener {
+                        Clog.e(it.stackTraceToString())
+                        cont.resume(StoreResult.Failure(it.localizedMessage))
+                    }
             }
         }
     }
@@ -105,7 +115,10 @@ internal class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseReposito
                             ?: StoreResult.Failure("Documents not found")
                         )
                     }
-                    .addOnFailureListener { cont.resume(StoreResult.Failure(it.localizedMessage)) }
+                    .addOnFailureListener {
+                        Clog.e(it.stackTraceToString())
+                        cont.resume(StoreResult.Failure(it.localizedMessage))
+                    }
             }
         }
     }
@@ -160,7 +173,10 @@ internal class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseReposito
                     cont.resume(StoreResult.Failure("The given path is wrong for a document"))
                 store.update(path, values)
                     .addOnSuccessListener { cont.resume(StoreResult.Success) }
-                    .addOnFailureListener { cont.resume(StoreResult.Failure(it.localizedMessage)) }
+                    .addOnFailureListener {
+                        Clog.e(it.stackTraceToString())
+                        cont.resume(StoreResult.Failure(it.localizedMessage))
+                    }
             }
         }
     }
@@ -173,6 +189,7 @@ internal class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseReposito
                 store.delete(path)
                     .addOnSuccessListener { cont.resume(StoreResult.Success) }
                     .addOnFailureListener {
+                        Clog.e(it.stackTraceToString())
                         cont.resume(StoreResult.Failure(it.localizedMessage))
                     }
             }

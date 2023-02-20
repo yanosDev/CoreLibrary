@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.coreLibrary)
     implementation(libs.androidx.core.ktx)
     val firebaseBom = platform(libs.firebase.bom)
     implementation(firebaseBom)
@@ -58,7 +59,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
             artifactId = "firestorewrapper"
-            version = "0.1.18"
+            version = libs.versions.core.lib.get()
 
             afterEvaluate {
                 from(components["release"])

@@ -29,7 +29,7 @@ coil = "2.2.0"
 compileSdk = "33"
 compose-compiler = "1.4.2"
 compose-snapshot = "-"
-coreLibrary = "0.1.14"
+core-lib = "0.1.18"
 coroutines = "1.6.4"
 crashlytics = "2.9.4"
 google-maps = "18.1.0"
@@ -112,7 +112,9 @@ androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", 
 androidx-window = { module = "androidx.window:window", version.ref = "androidx-window" }
 coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdkDesugar" }
-coreLibrary = { module = "com.github.yanosDev:CoreLibrary", version.ref = "coreLibrary" }
+coreLibrary = { module = "com.github.yanosDev:CoreLibrary", version.ref = "core-lib" }
+crashLog = { module = "com.github.yanosDev:CrashLog", version.ref = "core-lib" }
+firestoreWrapper = { module = "com.github.yanosDev:FirestoreWrapper", version.ref = "core-lib" }
 crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "crashlytics" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 googlemaps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
@@ -121,7 +123,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-crashlytics-buildtools = { module = "com.google.firebase:firebase-crashlytics-buildtools" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ndk" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
-firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-auth = { module = "com.google.firebase:firebase-auth-ktx" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
