@@ -4,6 +4,7 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    id(libs.plugins.googleServices.get().pluginId)
     id(libs.plugins.mavenPublish.get().pluginId)
 }
 
