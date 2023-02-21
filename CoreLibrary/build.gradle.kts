@@ -25,11 +25,6 @@ android {
 
     buildTypes {
         release {
-            buildConfigField(
-                "String",
-                "CLIENT_ID",
-                "104344124239-4tsd2idhjnqkn64g1u242pb5tbhm7bd6.apps.googleusercontent.com"
-            )
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -46,9 +41,6 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
-    testFixtures {
-        enable = true
     }
 }
 
@@ -83,7 +75,7 @@ dependencies {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "de.yanos"
+            groupId = "com.github.yanosDev.CoreLibrary"
             artifactId = "corelibrary"
             version = libs.versions.core.lib.get()
 

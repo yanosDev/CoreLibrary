@@ -24,8 +24,6 @@ android {
         }
     }
 
-
-
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
@@ -38,9 +36,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-    }
-    testFixtures {
-        enable = true
     }
 }
 
@@ -71,6 +66,8 @@ dependencies {
     implementation(firebaseBom)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    implementation(libs.google.auth)
+    implementation(libs.google.services)
 
     implementation(libs.kotlinx.coroutines.android)
 }
@@ -78,7 +75,7 @@ dependencies {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "de.yanos"
+            groupId = "com.github.yanosDev.CoreLibrary"
             artifactId = "firestorewrapper"
             version = libs.versions.core.lib.get()
 

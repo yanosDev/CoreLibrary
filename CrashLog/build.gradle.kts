@@ -36,9 +36,6 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    testFixtures {
-        enable = true
-    }
 }
 
 dependencies {
@@ -52,7 +49,7 @@ dependencies {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "de.yanos"
+            groupId = "com.github.yanosDev.CoreLibrary"
             artifactId = "crashlog"
             version = libs.versions.core.lib.get()
 
