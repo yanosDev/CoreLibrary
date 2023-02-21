@@ -31,11 +31,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    buildFeatures {
+        compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
