@@ -45,7 +45,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.coreLibrary)
+    implementation(libs.coreLibraryOld)
+    implementation(libs.crashLogOld)
 
     implementation(libs.androidx.core.ktx)
 

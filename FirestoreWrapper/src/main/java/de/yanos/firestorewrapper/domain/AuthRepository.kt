@@ -12,8 +12,8 @@ import kotlinx.coroutines.withContext
 data class AuthConfig(var debugVerification: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
 
 interface AuthRepositoryBuilder {
-    fun enableDebugVerification()
-    fun disableDebugVerification()
+    fun enableDebugVerification(): AuthRepositoryBuilder
+    fun disableDebugVerification(): AuthRepositoryBuilder
     fun build(): AuthRepository
 
     companion object {
@@ -25,12 +25,14 @@ interface AuthRepositoryBuilder {
 
 internal class AuthRepositoryBuilderImpl : AuthRepositoryBuilder {
     private val config = AuthConfig()
-    override fun enableDebugVerification() {
+    override fun enableDebugVerification(): AuthRepositoryBuilder {
         config.debugVerification = true
+        return this
     }
 
-    override fun disableDebugVerification() {
+    override fun disableDebugVerification(): AuthRepositoryBuilder {
         config.debugVerification = false
+        return this
     }
 
     override fun build(): AuthRepository {
