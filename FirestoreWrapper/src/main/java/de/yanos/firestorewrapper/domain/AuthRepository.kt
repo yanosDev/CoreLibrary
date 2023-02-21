@@ -36,13 +36,12 @@ internal class AuthRepositoryBuilderImpl : AuthRepositoryBuilder {
     override fun build(): AuthRepository {
         return AuthRepositoryImpl(config)
     }
-
 }
 
 interface AuthRepository {
     suspend fun signInAnonymously(): AuthResult
     suspend fun switchAnonymousToPassword(email: String, password: String): AuthResult
-    suspend fun switchAnonymousToGoogle(email: String): AuthResult
+    suspend fun switchAnonymousToGoogle(idToken: String): AuthResult
     suspend fun loginPasswordUser(email: String, password: String): AuthResult
     suspend fun loginGoogle(email: String, password: String): AuthResult
 }
@@ -84,7 +83,13 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
     }
 
     override suspend fun loginPasswordUser(email: String, password: String): AuthResult {
-        TODO("Not yet implemented")
+        return withContext(dispatcher) {
+            auth.signInWithEmailAndPassword(email, password).await()?.let { authResult ->
+                authResult.user?.let { user ->
+                    AuthResult.User(id = user.uid, email = user.email ?: "", name = user.displayName ?: "", provider = authResult.credential.provider)
+                }
+            } ?: AuthResult.Failure("Login failed")
+        }
     }
 
     override suspend fun loginGoogle(email: String, password: String): AuthResult {
