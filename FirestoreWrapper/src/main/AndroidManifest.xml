@@ -3,6 +3,14 @@
     package="de.yanos.firestorewrapper">
 
     <application>
-        <activity android:name=".ui.AuthenticationActivity" />
+        <activity
+            android:name=".ui.AuthenticationActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

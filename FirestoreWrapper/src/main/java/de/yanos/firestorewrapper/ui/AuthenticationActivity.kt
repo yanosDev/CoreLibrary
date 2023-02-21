@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import de.yanos.corelibrary.ui.theme.AppTheme
 import de.yanos.corelibrary.ui.theme.SonayPreviews
 
-
 class AuthenticationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
