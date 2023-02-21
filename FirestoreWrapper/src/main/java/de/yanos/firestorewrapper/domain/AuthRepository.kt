@@ -42,8 +42,9 @@ interface AuthRepository {
     suspend fun signInAnonymously(): AuthResult
     suspend fun switchAnonymousToPassword(email: String, password: String): AuthResult
     suspend fun switchAnonymousToGoogle(idToken: String): AuthResult
+    suspend fun createPasswordUser(email: String, password: String): AuthResult
     suspend fun loginPasswordUser(email: String, password: String): AuthResult
-    suspend fun loginGoogle(email: String, password: String): AuthResult
+    suspend fun loginWithCredential(credential: AuthCredential): AuthResult
 }
 
 internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
@@ -61,9 +62,9 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
                 authResult.user?.let { user ->
                     AuthResult.User(
                         id = user.uid,
-                        email = user.email ?: "",
-                        name = user.displayName ?: "",
-                        provider = authResult.credential?.provider ?: ""
+                        email = user.email,
+                        name = user.displayName,
+                        provider = authResult.credential?.provider
                     )
                 }
             } ?: AuthResult.Failure("Anonymous login failed")
@@ -82,28 +83,42 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
         }
     }
 
-    override suspend fun loginPasswordUser(email: String, password: String): AuthResult {
+    override suspend fun createPasswordUser(email: String, password: String): AuthResult {
         return withContext(dispatcher) {
-            auth.signInWithEmailAndPassword(email, password).await()?.let { authResult ->
+            auth.createUserWithEmailAndPassword(email, password).await()?.let { authResult ->
                 authResult.user?.let { user ->
-                    AuthResult.User(id = user.uid, email = user.email ?: "", name = user.displayName ?: "", provider = authResult.credential.provider)
+                    AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
                 }
             } ?: AuthResult.Failure("Login failed")
         }
     }
 
-    override suspend fun loginGoogle(email: String, password: String): AuthResult {
-        TODO("Not yet implemented")
+    override suspend fun loginPasswordUser(email: String, password: String): AuthResult {
+        return withContext(dispatcher) {
+            auth.signInWithEmailAndPassword(email, password).await()?.let { authResult ->
+                authResult.user?.let { user ->
+                    AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
+                }
+            } ?: AuthResult.Failure("Login failed")
+        }
+    }
+
+    override suspend fun loginWithCredential(credential: AuthCredential): AuthResult {
+        return withContext(dispatcher) {
+            auth.signInWithCredential(credential).await()?.user?.let { user ->
+                AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
+            } ?: AuthResult.Failure("Login failed")
+        }
     }
 
     private suspend fun linkAnonymousUser(credential: AuthCredential): AuthResult {
         return auth.currentUser?.linkWithCredential(credential)?.await()?.user?.let { user ->
-            AuthResult.User(id = user.uid, email = user.email ?: "", name = user.displayName ?: "", provider = credential.provider)
+            AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
         } ?: AuthResult.Failure("Failed to link anonymous user")
     }
 }
 
 sealed interface AuthResult {
-    class User(val id: String, val email: String, val name: String, val provider: String) : AuthResult
+    class User(val id: String, val email: String?, val name: String?, val provider: String?) : AuthResult
     class Failure(error: String?) : AuthResult
 }

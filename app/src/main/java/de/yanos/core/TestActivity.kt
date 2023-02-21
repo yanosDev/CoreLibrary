@@ -1,8 +1,6 @@
 package de.yanos.core
-/*
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -15,14 +13,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import de.yanos.core.ui.theme.AppTheme
-import de.yanos.core.ui.view.DynamicNavigationScreen
-import de.yanos.core.utils.NavigationDestination
+import de.yanos.corelibrary.ui.theme.AppTheme
+import de.yanos.corelibrary.ui.theme.SonayPreviews
+import de.yanos.corelibrary.ui.view.DynamicNavigationScreen
+import de.yanos.corelibrary.utils.NavigationDestination
 
 class TestActivity : ComponentActivity() {
-    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -42,6 +38,7 @@ class TestActivity : ComponentActivity() {
 }
 
 @OptIn(ExperimentalAnimationApi::class)
+@SonayPreviews
 @Composable
 private fun TestNavHost(
     modifier: Modifier = Modifier,
@@ -65,6 +62,9 @@ private fun TestNavHost(
         composable(TestRoutes.FOUR) {
             Text(text = TestRoutes.FOUR)
         }
+        composable(TestRoutes.LOGIN) {
+            Text(text = TestRoutes.LOGIN)
+        }
     }
 }
 
@@ -73,6 +73,7 @@ object TestRoutes {
     internal const val TWO = "Notes"
     internal const val THREE = "Conversations"
     internal const val FOUR = "Settings"
+    internal const val LOGIN = "Login"
 }
 
 private val TEST_DESTINATIONS = listOf(
@@ -101,4 +102,3 @@ private val TEST_DESTINATIONS = listOf(
         iconTextId = R.string.tab_settings
     ),
 )
-*/

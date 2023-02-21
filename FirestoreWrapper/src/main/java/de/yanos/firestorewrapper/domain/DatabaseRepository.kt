@@ -20,8 +20,8 @@ import kotlin.coroutines.suspendCoroutine
 data class DatabaseConfig(var isPersistenceEnabled: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
 
 interface DatabaseRepositoryBuilder {
-    fun enableOfflinePersistence()
-    fun disableOfflinePersistence()
+    fun enableOfflinePersistence(): DatabaseRepositoryBuilder
+    fun disableOfflinePersistence(): DatabaseRepositoryBuilder
     fun build(): DatabaseRepository
 
     companion object {
@@ -34,12 +34,14 @@ interface DatabaseRepositoryBuilder {
 internal class DatabaseRepositoryBuilderImpl : DatabaseRepositoryBuilder {
     private val config = DatabaseConfig()
 
-    override fun enableOfflinePersistence() {
+    override fun enableOfflinePersistence(): DatabaseRepositoryBuilder {
         config.isPersistenceEnabled = true
+        return this
     }
 
-    override fun disableOfflinePersistence() {
+    override fun disableOfflinePersistence(): DatabaseRepositoryBuilder {
         config.isPersistenceEnabled = false
+        return this
     }
 
     override fun build(): DatabaseRepository {

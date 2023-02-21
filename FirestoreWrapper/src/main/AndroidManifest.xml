@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="de.yanos.firestorewrapper" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="de.yanos.firestorewrapper">
+
+    <application>
+        <activity android:name=".ui.AuthenticationActivity" />
+    </application>
+</manifest>
