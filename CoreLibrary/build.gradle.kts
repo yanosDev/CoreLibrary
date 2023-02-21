@@ -75,7 +75,7 @@ dependencies {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "com.github.yanosDev.CoreLibrary"
+            groupId = "de.yanos"
             artifactId = "corelibrary"
             version = libs.versions.core.lib.get()
 
