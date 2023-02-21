@@ -42,6 +42,9 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
+    testFixtures {
+        enable = true
+    }
 }
 
 dependencies {

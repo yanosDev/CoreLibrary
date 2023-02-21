@@ -1,5 +1,5 @@
 package de.yanos.core
-
+/*
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -102,3 +102,4 @@ private val TEST_DESTINATIONS = listOf(
         iconTextId = R.string.tab_settings
     ),
 )
+*/

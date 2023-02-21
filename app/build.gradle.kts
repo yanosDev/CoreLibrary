@@ -34,8 +34,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.coreLibraryOld)
-    implementation(libs.firestoreWrapperOld)
+    //implementation(libs.coreLibraryOld)
+    //implementation(libs.firestoreWrapperOld)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
