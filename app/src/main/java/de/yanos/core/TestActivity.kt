@@ -28,7 +28,7 @@ class TestActivity : ComponentActivity() {
                     //NavHost Here
                     TestNavHost(
                         modifier = modifier,
-                        startRoute = TEST_DESTINATIONS.first().route,
+                        startRoute = TEST_DESTINATIONS.last().route,
                         navController = navController
                     )
                 }
