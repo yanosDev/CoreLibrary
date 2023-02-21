@@ -4,6 +4,7 @@
 plugins {
     alias(libs.plugins.android)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.crashlytics)
 }
 android {
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -34,8 +35,8 @@ android {
 }
 
 dependencies {
-    //implementation(libs.coreLibraryOld)
-    //implementation(libs.firestoreWrapperOld)
+    implementation(libs.coreLibraryOld)
+    implementation(libs.firestoreWrapperOld)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
