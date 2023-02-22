@@ -8,7 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,10 +18,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -47,21 +49,24 @@ class AuthenticationActivity : ComponentActivity() {
 fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: SignInClient) {
     val scope = rememberCoroutineScope()
     val authViewModel = AuthViewModel(clientId, AuthRepositoryBuilder.Builder().build())
+    var showButton = rememberSaveable { true }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
         }
     }
-    AuthScreen(modifier = modifier, onClick = {
+    AuthScreen(modifier = modifier, showButton = showButton, onClick = {
         scope.launch {
             oneTapClient.beginSignIn(authViewModel.signInRequest)
                 .addOnSuccessListener { result ->
                     launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
+                    showButton = false
                 }
                 .addOnFailureListener {
                     oneTapClient.beginSignIn(authViewModel.signUpRequest)
                         .addOnSuccessListener { result ->
                             launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
+                            showButton = false
                         }
                         .addOnFailureListener { Clog.e("Registration Failed") }
                 }
@@ -69,27 +74,28 @@ fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: Sign
     })
 }
 
-
 @SonayPreviews
+@Preview
 @Composable
-private fun AuthScreen(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-    Column(modifier = modifier.fillMaxSize()) {
-        Button(
-            onClick = onClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp),
-            shape = RoundedCornerShape(6.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black,
-                contentColor = Color.White
-            )
-        ) {
-            Image(
-                painter = painterResource(id = com.google.android.gms.base.R.drawable.common_full_open_on_phone),
-                contentDescription = ""
-            )
-            Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
-        }
+private fun AuthScreen(modifier: Modifier = Modifier, showButton: Boolean = true, onClick: () -> Unit = {}) {
+    Row(modifier = modifier.fillMaxSize()) {
+        if (showButton)
+            Button(
+                onClick = onClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp),
+                shape = RoundedCornerShape(6.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                )
+            ) {
+                Image(
+                    painter = painterResource(id = com.google.android.gms.base.R.drawable.common_full_open_on_phone),
+                    contentDescription = ""
+                )
+                Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
+            }
     }
 }
