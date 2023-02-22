@@ -19,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -37,39 +38,30 @@ import de.yanos.firestorewrapper.R
 import de.yanos.firestorewrapper.domain.AuthRepositoryBuilder
 import kotlinx.coroutines.launch
 
-class AuthenticationActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme(this) { config ->
-                AuthView(clientId = stringResource(id = R.string.client_id), oneTapClient = Identity.getSignInClient(this))
-            }
-        }
-    }
-}
-
 @Composable
 fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: SignInClient) {
     val scope = rememberCoroutineScope()
     val authViewModel = AuthViewModel(clientId, AuthRepositoryBuilder.Builder().build())
-    var showButton = rememberSaveable { true }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+    val registerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
         }
     }
-    AuthScreen(modifier = modifier.fillMaxSize(), showButton = showButton, onClick = {
+    val loginLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
+        }
+    }
+    AuthScreen(modifier = modifier.fillMaxSize(), isUserLoggedIn = authViewModel.userIsLoggedIn, onClick = {
         scope.launch {
             oneTapClient.beginSignIn(authViewModel.signInRequest)
                 .addOnSuccessListener { result ->
-                    launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
-                    showButton = false
+                    loginLauncher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
                 }
                 .addOnFailureListener {
                     oneTapClient.beginSignIn(authViewModel.signUpRequest)
                         .addOnSuccessListener { result ->
-                            launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
-                            showButton = false
+                            registerLauncher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
                         }
                         .addOnFailureListener { Clog.e("Registration Failed") }
                 }
@@ -80,11 +72,13 @@ fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: Sign
 @SonayPreviews
 @Preview
 @Composable
-private fun AuthScreen(modifier: Modifier = Modifier, showButton: Boolean = true, onClick: () -> Unit = {}) {
-    Row(modifier = modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.primary)) {
-        if (showButton)
+private fun AuthScreen(modifier: Modifier = Modifier, isUserLoggedIn: Boolean = true, onClick: () -> Unit = {}) {
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary)
+    ) {
+        if (!isUserLoggedIn)
             Button(
                 onClick = onClick,
                 modifier = Modifier

@@ -40,11 +40,13 @@ android {
 }
 
 dependencies {
-    implementation(libs.coreLibraryOld)
-    implementation(libs.firestoreWrapperOld)
+//    implementation(libs.coreLibraryOld)
+//    implementation(libs.firestoreWrapperOld)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(project(mapOf("path" to ":FirestoreWrapper")))
+    implementation(project(mapOf("path" to ":CoreLibrary")))
 
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)

@@ -41,6 +41,7 @@ internal class AuthRepositoryBuilderImpl : AuthRepositoryBuilder {
 }
 
 interface AuthRepository {
+    suspend fun isLoggedIn(): Boolean
     suspend fun signInAnonymously(): AuthResult
     suspend fun switchAnonymousToPassword(email: String, password: String): AuthResult
     suspend fun switchAnonymousToGoogle(idToken: String): AuthResult
@@ -56,6 +57,10 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
     init {
         auth.firebaseAuthSettings
             .setAppVerificationDisabledForTesting(!config.debugVerification)
+    }
+
+    override suspend fun isLoggedIn(): Boolean {
+        return auth.currentUser != null
     }
 
     override suspend fun signInAnonymously(): AuthResult {

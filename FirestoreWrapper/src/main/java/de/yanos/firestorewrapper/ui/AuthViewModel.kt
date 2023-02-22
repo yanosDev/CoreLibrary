@@ -1,11 +1,15 @@
 package de.yanos.firestorewrapper.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInCredential
 import com.google.firebase.auth.GoogleAuthProvider
 import de.yanos.firestorewrapper.domain.AuthRepository
+import de.yanos.firestorewrapper.domain.AuthResult
 import kotlinx.coroutines.launch
 
 internal class AuthViewModel(
@@ -15,8 +19,12 @@ internal class AuthViewModel(
 
     internal val signInRequest: BeginSignInRequest
     internal val signUpRequest: BeginSignInRequest
+    var userIsLoggedIn: Boolean by mutableStateOf(false)
 
     init {
+        viewModelScope.launch {
+            userIsLoggedIn = authRepository.isLoggedIn()
+        }
         signUpRequest = BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
@@ -52,7 +60,8 @@ internal class AuthViewModel(
         viewModelScope.launch {
             val idToken = googleCredential.googleIdToken
             val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-            authRepository.loginWithCredential(firebaseCredential)
+            val result = authRepository.loginWithCredential(firebaseCredential)
+            userIsLoggedIn = result is AuthResult.User
         }
     }
 }

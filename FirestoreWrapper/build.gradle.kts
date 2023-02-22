@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.crashlytics)
-    id(libs.plugins.googleServices.get().pluginId)
     id(libs.plugins.mavenPublish.get().pluginId)
 }
 
