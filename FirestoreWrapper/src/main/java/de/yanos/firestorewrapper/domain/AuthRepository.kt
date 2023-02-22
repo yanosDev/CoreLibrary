@@ -42,6 +42,7 @@ internal class AuthRepositoryBuilderImpl : AuthRepositoryBuilder {
 
 interface AuthRepository {
     suspend fun isLoggedIn(): Boolean
+    suspend fun logOutUser()
     suspend fun signInAnonymously(): AuthResult
     suspend fun switchAnonymousToPassword(email: String, password: String): AuthResult
     suspend fun switchAnonymousToGoogle(idToken: String): AuthResult
@@ -63,11 +64,15 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
         return auth.currentUser != null
     }
 
+    override suspend fun logOutUser() {
+        auth.signOut()
+    }
+
     override suspend fun signInAnonymously(): AuthResult {
         return withContext(dispatcher) {
             auth.signInAnonymously().await()?.let { authResult ->
                 authResult.user?.let { user ->
-                    AuthResult.User(
+                    AuthResult.SignIn(
                         id = user.uid,
                         email = user.email,
                         name = user.displayName,
@@ -94,7 +99,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
         return withContext(dispatcher) {
             auth.createUserWithEmailAndPassword(email, password).await()?.let { authResult ->
                 authResult.user?.let { user ->
-                    AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
+                    AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
                 }
             } ?: AuthResult.Failure("Login failed")
         }
@@ -104,7 +109,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
         return withContext(dispatcher) {
             auth.signInWithEmailAndPassword(email, password).await()?.let { authResult ->
                 authResult.user?.let { user ->
-                    AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
+                    AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
                 }
             } ?: AuthResult.Failure("Login failed")
         }
@@ -113,19 +118,20 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
     override suspend fun loginWithCredential(credential: AuthCredential): AuthResult {
         return withContext(dispatcher) {
             auth.signInWithCredential(credential).await()?.user?.let { user ->
-                AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
+                AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
             } ?: AuthResult.Failure("Login failed")
         }
     }
 
     private suspend fun linkAnonymousUser(credential: AuthCredential): AuthResult {
         return auth.currentUser?.linkWithCredential(credential)?.await()?.user?.let { user ->
-            AuthResult.User(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
+            AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
         } ?: AuthResult.Failure("Failed to link anonymous user")
     }
 }
 
 sealed interface AuthResult {
-    class User(val id: String, val email: String?, val name: String?, val provider: String?) : AuthResult
+    object LoggedOut : AuthResult
+    class SignIn(val id: String, val email: String?, val name: String?, val provider: String?) : AuthResult
     class Failure(error: String?) : AuthResult
 }

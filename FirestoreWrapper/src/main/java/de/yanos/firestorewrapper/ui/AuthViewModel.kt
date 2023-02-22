@@ -14,12 +14,13 @@ import kotlinx.coroutines.launch
 
 internal class AuthViewModel(
     clientId: String,
-    val authRepository: AuthRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     internal val signInRequest: BeginSignInRequest
     internal val signUpRequest: BeginSignInRequest
     var userIsLoggedIn: Boolean by mutableStateOf(false)
+    var userState: AuthResult by mutableStateOf(AuthResult.LoggedOut)
 
     init {
         viewModelScope.launch {
@@ -61,7 +62,16 @@ internal class AuthViewModel(
             val idToken = googleCredential.googleIdToken
             val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
             val result = authRepository.loginWithCredential(firebaseCredential)
-            userIsLoggedIn = result is AuthResult.User
+            userIsLoggedIn = result is AuthResult.SignIn
+            userState = result
+        }
+    }
+
+    fun signOutUser() {
+        viewModelScope.launch {
+            authRepository.logOutUser()
+            userState = AuthResult.LoggedOut
+            userIsLoggedIn = false
         }
     }
 }

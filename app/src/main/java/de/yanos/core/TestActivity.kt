@@ -68,7 +68,7 @@ private fun TestNavHost(
             Text(text = TestRoutes.FOUR)
         }
         composable(TestRoutes.LOGIN) {
-            AuthView(clientId = stringResource(id = R.string.client_id), oneTapClient = Identity.getSignInClient(activity))
+            AuthView(clientId = stringResource(id = R.string.client_id), oneTapClient = Identity.getSignInClient(activity), onUserStateChange = {})
         }
     }
 }
@@ -108,8 +108,8 @@ private val TEST_DESTINATIONS = listOf(
     ),
     NavigationDestination.TopDestination(
         route = TestRoutes.LOGIN,
-        selectedIcon = Icons.Default.Settings,
-        unselectedIcon = Icons.Default.Settings,
+        selectedIcon = Icons.Default.Login,
+        unselectedIcon = Icons.Default.Login,
         iconTextId = R.string.tab_login
     ),
 )
