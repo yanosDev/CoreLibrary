@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="btn_login_google">Sign in with Google</string>
+    <string name="btn_logout">Sign Out</string>
+    <string name="login">Login</string>
+</resources>
