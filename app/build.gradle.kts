@@ -8,6 +8,7 @@ plugins {
     id(libs.plugins.googleServices.get().pluginId)
 }
 android {
+    namespace = "de.yanos.core"
     compileSdk = libs.versions.compileSdk.get().toInt()
     defaultConfig {
         applicationId = "de.yanos.core"
