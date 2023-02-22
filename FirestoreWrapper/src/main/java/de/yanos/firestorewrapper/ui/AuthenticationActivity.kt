@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,10 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -55,7 +58,7 @@ fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: Sign
             authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
         }
     }
-    AuthScreen(modifier = modifier, showButton = showButton, onClick = {
+    AuthScreen(modifier = modifier.fillMaxSize(), showButton = showButton, onClick = {
         scope.launch {
             oneTapClient.beginSignIn(authViewModel.signInRequest)
                 .addOnSuccessListener { result ->
@@ -78,11 +81,14 @@ fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: Sign
 @Preview
 @Composable
 private fun AuthScreen(modifier: Modifier = Modifier, showButton: Boolean = true, onClick: () -> Unit = {}) {
-    Row(modifier = modifier.fillMaxSize()) {
+    Row(modifier = modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.primary)) {
         if (showButton)
             Button(
                 onClick = onClick,
                 modifier = Modifier
+                    .align(Alignment.Bottom)
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp),
                 shape = RoundedCornerShape(6.dp),

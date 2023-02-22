@@ -9,14 +9,17 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.auth.api.identity.Identity
 import de.yanos.corelibrary.ui.theme.AppTheme
 import de.yanos.corelibrary.ui.theme.SonayPreviews
 import de.yanos.corelibrary.ui.view.DynamicNavigationScreen
 import de.yanos.corelibrary.utils.NavigationDestination
+import de.yanos.firestorewrapper.ui.AuthView
 
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +32,8 @@ class TestActivity : ComponentActivity() {
                     TestNavHost(
                         modifier = modifier,
                         startRoute = TEST_DESTINATIONS.last().route,
-                        navController = navController
+                        navController = navController,
+                        this
                     )
                 }
             }
@@ -43,7 +47,8 @@ class TestActivity : ComponentActivity() {
 private fun TestNavHost(
     modifier: Modifier = Modifier,
     startRoute: String,
-    navController: NavHostController
+    navController: NavHostController,
+    activity: TestActivity
 ) {
     NavHost(
         modifier = modifier,
@@ -63,7 +68,7 @@ private fun TestNavHost(
             Text(text = TestRoutes.FOUR)
         }
         composable(TestRoutes.LOGIN) {
-           // AuthView(clientId = stringResource(id = R.string.client_id), oneTapClient = Identity.getSignInClient(this))
+            AuthView(clientId = stringResource(id = R.string.client_id), oneTapClient = Identity.getSignInClient(activity))
         }
     }
 }
@@ -100,5 +105,11 @@ private val TEST_DESTINATIONS = listOf(
         selectedIcon = Icons.Default.Settings,
         unselectedIcon = Icons.Default.Settings,
         iconTextId = R.string.tab_settings
+    ),
+    NavigationDestination.TopDestination(
+        route = TestRoutes.LOGIN,
+        selectedIcon = Icons.Default.Settings,
+        unselectedIcon = Icons.Default.Settings,
+        iconTextId = R.string.tab_login
     ),
 )
