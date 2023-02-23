@@ -9,10 +9,13 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.adaptive.calculateDisplayFeatures
@@ -30,26 +33,33 @@ private val AppTypography = Typography(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Bold,
         fontSize = 57.sp,
+        fontStyle = FontStyle.Italic,
         lineHeight = 64.0.sp,
         letterSpacing = (-0.2).sp,
+        shadow = Shadow(
+            offset = Offset(10f, 8f),
+            blurRadius = 15f
+        ),
     ),
     displayMedium = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Normal,
-        fontSize = 36.sp,
+        fontStyle = FontStyle.Italic,
+        fontSize = 45.sp,
         lineHeight = 44.0.sp,
         letterSpacing = 0.0.sp,
     ),
     displaySmall = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Normal,
-        fontSize = 45.sp,
+        fontSize = 36.sp,
         lineHeight = 44.0.sp,
         letterSpacing = 0.0.sp,
     ),
     headlineLarge = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Bold,
+        fontStyle = FontStyle.Italic,
         fontSize = 32.sp,
         lineHeight = 40.0.sp,
         letterSpacing = 0.0.sp,
@@ -63,14 +73,15 @@ private val AppTypography = Typography(
     ),
     headlineSmall = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         fontSize = 24.sp,
         lineHeight = 32.0.sp,
         letterSpacing = 0.0.sp,
     ),
     titleLarge = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Bold,
+        fontStyle = FontStyle.Italic,
         fontSize = 22.sp,
         lineHeight = 28.0.sp,
         letterSpacing = 0.0.sp,
@@ -91,7 +102,8 @@ private val AppTypography = Typography(
     ),
     bodyLarge = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Bold,
+        fontStyle = FontStyle.Italic,
         fontSize = 16.sp,
         lineHeight = 24.0.sp,
         letterSpacing = 0.5.sp,
@@ -150,6 +162,7 @@ fun AppTheme(
     val typography = AppTypography
     MaterialTheme(
         colorScheme = colors,
+        shapes = MaterialTheme.shapes,
         typography = typography,
         content = content,
     )

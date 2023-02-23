@@ -1,9 +1,7 @@
 package de.yanos.firestorewrapper.domain
 
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.*
+import de.yanos.crashlog.util.Clog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -42,6 +40,7 @@ internal class AuthRepositoryBuilderImpl : AuthRepositoryBuilder {
 
 interface AuthRepository {
     suspend fun isLoggedIn(): Boolean
+    suspend fun userIsRegistered(email: String): Boolean
     suspend fun logOutUser()
     suspend fun signInAnonymously(): AuthResult
     suspend fun switchAnonymousToPassword(email: String, password: String): AuthResult
@@ -49,6 +48,7 @@ interface AuthRepository {
     suspend fun createPasswordUser(email: String, password: String): AuthResult
     suspend fun loginPasswordUser(email: String, password: String): AuthResult
     suspend fun loginWithCredential(credential: AuthCredential): AuthResult
+    suspend fun sendPasswordResetEmail(email: String): AuthResult
 }
 
 internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
@@ -64,62 +64,118 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
         return auth.currentUser != null
     }
 
+    override suspend fun userIsRegistered(email: String): Boolean {
+        return withContext(dispatcher) {
+            try {
+                auth.fetchSignInMethodsForEmail(email).await().signInMethods.isNullOrEmpty()
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                false
+            }
+        }
+    }
+
     override suspend fun logOutUser() {
         auth.signOut()
     }
 
     override suspend fun signInAnonymously(): AuthResult {
         return withContext(dispatcher) {
-            auth.signInAnonymously().await()?.let { authResult ->
-                authResult.user?.let { user ->
-                    AuthResult.SignIn(
-                        id = user.uid,
-                        email = user.email,
-                        name = user.displayName,
-                        provider = authResult.credential?.provider
-                    )
-                }
-            } ?: AuthResult.Failure("Anonymous login failed")
+            try {
+                auth.signInAnonymously().await()?.let { authResult ->
+                    authResult.user?.let { user ->
+                        AuthResult.SignIn(
+                            id = user.uid,
+                            email = user.email,
+                            name = user.displayName,
+                            provider = authResult.credential?.provider
+                        )
+                    }
+                } ?: AuthResult.Failure("Anonymous login failed")
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                AuthResult.Failure("Anonymous login failed")
+            }
         }
     }
 
     override suspend fun switchAnonymousToPassword(email: String, password: String): AuthResult {
         return withContext(dispatcher) {
-            linkAnonymousUser(EmailAuthProvider.getCredential(email, password))
+            try {
+                linkAnonymousUser(EmailAuthProvider.getCredential(email, password))
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                AuthResult.Failure("Anonymous login with email password failed")
+            }
         }
     }
 
     override suspend fun switchAnonymousToGoogle(idToken: String): AuthResult {
         return withContext(dispatcher) {
-            linkAnonymousUser(GoogleAuthProvider.getCredential(idToken, null))
+            try {
+                linkAnonymousUser(GoogleAuthProvider.getCredential(idToken, null))
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                AuthResult.Failure("Anonymous login with credentials failed")
+            }
         }
     }
 
     override suspend fun createPasswordUser(email: String, password: String): AuthResult {
         return withContext(dispatcher) {
-            auth.createUserWithEmailAndPassword(email, password).await()?.let { authResult ->
-                authResult.user?.let { user ->
-                    AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
-                }
-            } ?: AuthResult.Failure("Login failed")
+            try {
+                auth.createUserWithEmailAndPassword(email, password).await()?.let { authResult ->
+                    authResult.user?.let { user ->
+                        AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
+                    }
+                } ?: AuthResult.Failure("Creating user failed")
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                AuthResult.Failure("Exception while email user creation")
+            }
         }
     }
 
     override suspend fun loginPasswordUser(email: String, password: String): AuthResult {
         return withContext(dispatcher) {
-            auth.signInWithEmailAndPassword(email, password).await()?.let { authResult ->
-                authResult.user?.let { user ->
-                    AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
-                }
-            } ?: AuthResult.Failure("Login failed")
+            try {
+                auth.signInWithEmailAndPassword(email, password).await()?.let { authResult ->
+                    authResult.user?.let { user ->
+                        AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = authResult.credential?.provider)
+                    }
+                } ?: AuthResult.Failure("Login failed")
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                AuthResult.Failure("Exception while password login")
+            }
         }
     }
 
     override suspend fun loginWithCredential(credential: AuthCredential): AuthResult {
         return withContext(dispatcher) {
-            auth.signInWithCredential(credential).await()?.user?.let { user ->
-                AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
-            } ?: AuthResult.Failure("Login failed")
+            try {
+                auth.signInWithCredential(credential).await()?.user?.let { user ->
+                    AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
+                } ?: AuthResult.Failure("Login failed")
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                AuthResult.Failure("Exception while credential login")
+            }
+        }
+    }
+
+    override suspend fun sendPasswordResetEmail(email: String): AuthResult {
+        return withContext(dispatcher) {
+            try {
+                auth.sendPasswordResetEmail(email).apply { await() }.let {
+                    if (it.isSuccessful)
+                        AuthResult.PasswordResetSent
+                    else AuthResult.Failure(it.exception?.localizedMessage)
+                }
+            } catch (e: FirebaseAuthException) {
+                Clog.e(e.localizedMessage ?: "")
+                AuthResult.Failure("Exception while Password reset")
+            }
         }
     }
 
@@ -134,4 +190,5 @@ sealed interface AuthResult {
     object LoggedOut : AuthResult
     class SignIn(val id: String, val email: String?, val name: String?, val provider: String?) : AuthResult
     class Failure(error: String?) : AuthResult
+    object PasswordResetSent : AuthResult
 }

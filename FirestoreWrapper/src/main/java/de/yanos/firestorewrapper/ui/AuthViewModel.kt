@@ -62,8 +62,17 @@ internal class AuthViewModel(
             val idToken = googleCredential.googleIdToken
             val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
             val result = authRepository.loginWithCredential(firebaseCredential)
-            userIsLoggedIn = result is AuthResult.SignIn
-            userState = result
+            setStateFromResult(result)
+        }
+    }
+
+    fun signInUser(email: String, password: String) {
+        viewModelScope.launch {
+            val result = if (authRepository.userIsRegistered(email))
+                authRepository.loginPasswordUser(email, password)
+            else
+                authRepository.createPasswordUser(email, password)
+            setStateFromResult(result)
         }
     }
 
@@ -73,5 +82,17 @@ internal class AuthViewModel(
             userState = AuthResult.LoggedOut
             userIsLoggedIn = false
         }
+    }
+
+    fun requestPasswordReset(email: String) {
+        viewModelScope.launch {
+            val result = authRepository.sendPasswordResetEmail(email)
+            setStateFromResult(result)
+        }
+    }
+
+    private fun setStateFromResult(result: AuthResult) {
+        userIsLoggedIn = result is AuthResult.SignIn
+        userState = result
     }
 }
