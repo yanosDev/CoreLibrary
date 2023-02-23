@@ -7,9 +7,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Login
 import androidx.compose.material.icons.rounded.Logout
@@ -90,26 +92,31 @@ private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthActio
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(32.dp),
         verticalArrangement = Arrangement.SpaceAround,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         var username by remember { mutableStateOf(TextFieldValue()) }
         var password by remember { mutableStateOf(TextFieldValue()) }
         Column(
+            modifier = Modifier.padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = stringResource(id = R.string.welcome),
                 style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = stringResource(id = R.string.signIn_to_continue),
                 style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
         Column(
+            modifier = Modifier.padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
@@ -133,11 +140,12 @@ private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthActio
                     ClickableText(
                         text = AnnotatedString(stringResource(id = R.string.forgot_password)),
                         onClick = { authExecutor(PasswordReset(email = username.text)) },
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     )
                 else Text(
-                    text = AnnotatedString(stringResource(id = R.string.forgot_password)),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = stringResource(id = R.string.forgot_password),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 TextButton(
@@ -159,6 +167,7 @@ private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthActio
         }
         Spacer(modifier = Modifier.height(20.dp))
         Column(
+            modifier = Modifier.padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
