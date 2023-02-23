@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.adaptive.calculateDisplayFeatures
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import de.yanos.corelibrary.R
 import de.yanos.corelibrary.utils.ScreenConfig
 
@@ -182,12 +183,16 @@ fun AppTheme(
         } else {
             dynamicLightColorScheme(LocalContext.current)
         }
-
-
+    val systemUiController = rememberSystemUiController()
     val typography = AppTypography
     MaterialTheme(
         colorScheme = colors,
         typography = typography,
-        content = { content(ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity))) },
+        content = {
+            systemUiController.setSystemBarsColor(color = MaterialTheme.colorScheme.surface)
+            systemUiController.setNavigationBarColor(color = MaterialTheme.colorScheme.surfaceVariant)
+            content(ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity)))
+        },
     )
+
 }

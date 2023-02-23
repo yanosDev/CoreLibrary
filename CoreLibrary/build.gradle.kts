@@ -62,6 +62,7 @@ dependencies {
 
     implementation("androidx.compose.material3:material3:1.1.0-alpha06")
     implementation("com.google.accompanist:accompanist-adaptive:0.29.1-alpha")
+    implementation(libs.accompanist.systemuicontroller)
 
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

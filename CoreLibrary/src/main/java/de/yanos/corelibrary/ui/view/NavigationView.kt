@@ -122,7 +122,7 @@ fun DynamicContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             content(Modifier.weight(1f))
             AnimatedVisibility(visible = config.navigationType == NavigationType.BOTTOM) {
@@ -143,7 +143,7 @@ fun DynamicBottomBar(
     destinations: List<NavigationDestination.TopDestination>,
     navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit
 ) {
-    NavigationBar(modifier = modifier.fillMaxWidth()) {
+    NavigationBar(modifier = modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.surfaceVariant) {
         destinations.forEach { destination ->
             NavigationBarItem(
                 selected = route == destination.route,
@@ -169,7 +169,7 @@ fun DynamicRail(
 ) {
     NavigationRail(
         modifier = modifier.fillMaxHeight(),
-        containerColor = MaterialTheme.colorScheme.inverseOnSurface
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Layout(
             modifier = Modifier.widthIn(max = 80.dp),
@@ -241,7 +241,7 @@ private fun PermanentNavigationDrawerContent(
     PermanentDrawerSheet(modifier = modifier.sizeIn(minWidth = 200.dp, maxWidth = 300.dp)) {
         Layout(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
             content = {
                 Column(
@@ -283,7 +283,7 @@ private fun ModalNavigationDrawerContent(
     ModalDrawerSheet {
         Layout(
             modifier = modifier
-                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
             content = {
                 Column(
