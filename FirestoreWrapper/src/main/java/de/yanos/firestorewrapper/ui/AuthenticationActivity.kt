@@ -19,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
@@ -143,6 +144,7 @@ private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthActio
                         style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     )
                 else Text(
+                    modifier = modifier.alpha(0.6f),
                     text = stringResource(id = R.string.forgot_password),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -161,6 +163,7 @@ private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthActio
                     Text(
                         text = stringResource(id = R.string.signIn),
                         style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -173,6 +176,7 @@ private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthActio
             Text(
                 text = stringResource(id = R.string.signIn_alternative),
                 style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(20.dp))
             Button(
