@@ -29,8 +29,7 @@ coil = "2.2.0"
 compileSdk = "33"
 compose-compiler = "1.4.2"
 compose-snapshot = "-"
-core-lib = "0.1.36"
-core-old = "0.1.35"
+core-lib = "0.1.37"
 coroutines = "1.6.4"
 crashlytics = "2.9.4"
 google-maps = "18.1.0"
@@ -46,7 +45,7 @@ kotlin = "1.8.10"
 maps-compose = "2.5.3"
 material = "1.9.0-alpha01"
 # @keep
-minSdk = "21"
+minSdk = "24"
 okhttp = "4.10.0"
 robolectric = "4.9.2"
 rome = "1.18.0"
@@ -116,11 +115,8 @@ androidx-window = { module = "androidx.window:window", version.ref = "androidx-w
 coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdkDesugar" }
 coreLibrary = { module = "com.github.yanosDev.CoreLibrary:corelibrary", version.ref = "core-lib" }
-coreLibraryOld = { module = "com.github.yanosDev.CoreLibrary:corelibrary", version.ref = "core-old" }
 crashLog = { module = "com.github.yanosDev.CoreLibrary:crashlog", version.ref = "core-lib" }
-crashLogOld = { module = "com.github.yanosDev.CoreLibrary:crashlog", version.ref = "core-old" }
 firestoreWrapper = { module = "com.github.yanosDev.CoreLibrary:firestorewrapper", version.ref = "core-lib" }
-firestoreWrapperOld = { module = "com.github.yanosDev.CoreLibrary:firestorewrapper", version.ref = "core-old" }
 crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "crashlytics" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 googlemaps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }

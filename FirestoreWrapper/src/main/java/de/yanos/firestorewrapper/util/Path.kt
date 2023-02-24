@@ -3,7 +3,7 @@ package de.yanos.firestorewrapper.util
 interface DatabasePath<T> {
     val id: String
     val path: List<String>
-    val conditions: MutableList<Condition>
+    val conditions: List<Condition>
     val clazz: Class<T>
     fun isDocumentRequest(): Boolean
     fun isCollectionRequest(): Boolean
@@ -11,7 +11,7 @@ interface DatabasePath<T> {
 
 internal data class DatabasePathImpl<T>(
     override val path: List<String>,
-    override val conditions: MutableList<Condition>,
+    override val conditions: List<Condition>,
     override val clazz: Class<T>
 ) :
     DatabasePath<T> {
@@ -20,21 +20,23 @@ internal data class DatabasePathImpl<T>(
             "${path.joinToString(separator = "/")} ${
                 conditions.sortedBy { it.priority }.joinToString { condition -> condition.priority.toString() + condition.uniqueId }
             }"
+
     override fun isDocumentRequest(): Boolean = path.size % 2 != 1
     override fun isCollectionRequest(): Boolean = !isDocumentRequest()
 }
 
 sealed interface DatabasePathBuilder<T> {
-    val paths: MutableList<String>
-    val conditions: MutableList<Condition>
+    val paths: List<String>
+    val conditions: List<Condition>
     val clazz: Class<T>
+
     fun build(): DatabasePath<T> {
         return DatabasePathImpl(paths, conditions, clazz)
     }
 
     companion object {
-        fun <T> Builder(clazz: Class<T>): CollectionPathBuilder<T> {
-            return CollectionPathBuilderImpl(mutableListOf(), mutableListOf(), clazz)
+        fun <T> Builder(collectionName: String, clazz: Class<T>): CollectionPathBuilder<T> {
+            return CollectionPathBuilderImpl(mutableListOf(collectionName), mutableListOf(), clazz)
         }
     }
 }

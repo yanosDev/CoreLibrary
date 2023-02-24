@@ -1,13 +1,11 @@
 package de.yanos.firestorewrapper.domain
 
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.*
 import de.yanos.crashlog.util.Clog
 import de.yanos.firestorewrapper.util.Condition
 import de.yanos.firestorewrapper.util.DatabasePath
+import de.yanos.firestorewrapper.util.FieldEdit
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -17,11 +15,12 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-data class DatabaseConfig(var isPersistenceEnabled: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
+private data class DatabaseConfig(var isPersistenceEnabled: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
 
 interface DatabaseRepositoryBuilder {
     fun enableOfflinePersistence(): DatabaseRepositoryBuilder
     fun disableOfflinePersistence(): DatabaseRepositoryBuilder
+    fun setDispatcher(dispatcher: CoroutineDispatcher): DatabaseRepositoryBuilder
     fun build(): DatabaseRepository
 
     companion object {
@@ -31,7 +30,7 @@ interface DatabaseRepositoryBuilder {
     }
 }
 
-internal class DatabaseRepositoryBuilderImpl : DatabaseRepositoryBuilder {
+private class DatabaseRepositoryBuilderImpl : DatabaseRepositoryBuilder {
     private val config = DatabaseConfig()
 
     override fun enableOfflinePersistence(): DatabaseRepositoryBuilder {
@@ -41,6 +40,11 @@ internal class DatabaseRepositoryBuilderImpl : DatabaseRepositoryBuilder {
 
     override fun disableOfflinePersistence(): DatabaseRepositoryBuilder {
         config.isPersistenceEnabled = false
+        return this
+    }
+
+    override fun setDispatcher(dispatcher: CoroutineDispatcher): DatabaseRepositoryBuilder {
+        config.dispatcher = dispatcher
         return this
     }
 
@@ -59,7 +63,7 @@ interface DatabaseRepository {
     suspend fun <T> delete(path: DatabasePath<T>): StoreResult<T>
 }
 
-internal class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseRepository {
+private class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseRepository {
     private val store: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val dispatcher = config.dispatcher
 
@@ -227,7 +231,7 @@ fun Query.buildConditions(conditions: List<Condition>): Query {
 }
 
 fun <T> FirebaseFirestore.update(path: DatabasePath<T>, values: Map<String, Any>): Task<Void> {
-    return document(path.buildPath()).update(values)
+    return document(path.buildPath()).update(values.replaceEdits())
 }
 
 fun <T> FirebaseFirestore.delete(path: DatabasePath<T>): Task<Void> {
@@ -236,6 +240,21 @@ fun <T> FirebaseFirestore.delete(path: DatabasePath<T>): Task<Void> {
 
 fun <T> DatabasePath<T>.buildPath(): String {
     return path.joinToString(separator = "/")
+}
+
+fun Map<String, Any>.replaceEdits(): Map<String, Any> {
+    val newMap = mutableMapOf<String, Any>()
+    forEach { (field, value) ->
+        newMap[field] = {
+            when (value) {
+                is FieldEdit.Delete -> FieldValue.delete()
+                is FieldEdit.ArrayAdd -> FieldValue.arrayUnion(value.ids)
+                is FieldEdit.ArrayRemove -> FieldValue.arrayRemove(value.ids)
+                else -> value
+            }
+        }
+    }
+    return newMap
 }
 
 sealed interface StoreResult<out T> {

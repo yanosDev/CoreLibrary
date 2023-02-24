@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/CrashLog" />
             <option value="$PROJECT_DIR$/FirestoreWrapper" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/chat" />
           </set>
         </option>
       </GradleProjectSettings>
