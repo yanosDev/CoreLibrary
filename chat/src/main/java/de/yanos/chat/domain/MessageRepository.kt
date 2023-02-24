@@ -112,10 +112,10 @@ data class MediaMessageCreationContent(
 
 interface MessageRepository {
     suspend fun createMessage(content: MessageCreationContent): StoreResult<Message>
-    suspend fun updateMessageText(id: String, userId: String, text: String): StoreResult<Message>
-    suspend fun updateMessageState(id: String, userId: String, state: MessageState): StoreResult<Message>
-    suspend fun addMessageReaction(id: String, userId: String, reactions: String): StoreResult<Message>
-    suspend fun removeMessageReaction(id: String, userId: String, reaction: String): StoreResult<Message>
+    suspend fun updateMessageText(id: String, chatId: String, userId: String, text: String): StoreResult<Message>
+    suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message>
+    suspend fun addMessageReaction(id: String, chatId: String, userId: String, reactions: String): StoreResult<Message>
+    suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
 }
 
 private class MessageRepositoryImpl(
@@ -124,36 +124,39 @@ private class MessageRepositoryImpl(
     private val dispatcher = config.dispatcher
     private val databaseRepository = config.databaseRepository
 
-    private fun collectionPath(): CollectionPathBuilder<Message> {
-        return DatabasePathBuilder.Builder("messages", Message::class.java)
+    private fun collectionPath(chatId: String): CollectionPathBuilder<Message> {
+        return DatabasePathBuilder
+            .Builder("chats", Message::class.java)
+            .document(chatId)
+            .collection("messages")
     }
 
-    private fun documentPath(id: String): DocumentPathBuilder<Message> {
-        return collectionPath().document(id)
+    private fun documentPath(chatId: String, id: String): DocumentPathBuilder<Message> {
+        return collectionPath(chatId).document(id)
     }
 
     override suspend fun createMessage(content: MessageCreationContent): StoreResult<Message> {
         return withContext(dispatcher) {
             databaseRepository.create(
-                documentPath(content.id).build(),
+                documentPath(content.chatId, content.id).build(),
                 content.toMap()
             )
         }
     }
 
-    override suspend fun updateMessageText(id: String, userId: String, text: String): StoreResult<Message> {
+    override suspend fun updateMessageText(id: String, chatId: String, userId: String, text: String): StoreResult<Message> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateMessageState(id: String, userId: String, state: MessageState): StoreResult<Message> {
+    override suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun addMessageReaction(id: String, userId: String, reactions: String): StoreResult<Message> {
+    override suspend fun addMessageReaction(id: String, chatId: String, userId: String, reactions: String): StoreResult<Message> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun removeMessageReaction(id: String, userId: String, reaction: String): StoreResult<Message> {
+    override suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message> {
         TODO("Not yet implemented")
     }
 }

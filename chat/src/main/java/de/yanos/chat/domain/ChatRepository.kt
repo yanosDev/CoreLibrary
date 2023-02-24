@@ -1,7 +1,6 @@
 package de.yanos.chat.domain
 
 import de.yanos.chat.data.Chat
-import de.yanos.chat.data.ChatState
 import de.yanos.firestorewrapper.domain.DatabaseRepository
 import de.yanos.firestorewrapper.domain.DatabaseRepositoryBuilder
 import de.yanos.firestorewrapper.domain.StoreResult
@@ -52,7 +51,6 @@ interface ChatRepository {
     suspend fun addChatMembers(id: String, newMembers: List<String>): StoreResult<Chat>
     suspend fun removeChatMembers(id: String, removedMembers: List<String>): StoreResult<Chat>
     suspend fun updateChatName(id: String, name: String): StoreResult<Chat>
-    suspend fun updateChatState(id: String, userId: String, state: ChatState): StoreResult<Chat>
 }
 
 private class ChatRepositoryImpl(
@@ -76,8 +74,8 @@ private class ChatRepositoryImpl(
                 mapOf(
                     "id" to id,
                     "name" to "",
-                    "members" to members,
-                    "userStates" to mutableMapOf<String, ChatState>().apply { members.forEach { userId -> put(userId, ChatState.ACTIVE) } }
+                    "memberIds" to members,
+                    "previousMemberIds" to listOf<String>()
                 )
             )
         }
@@ -88,7 +86,8 @@ private class ChatRepositoryImpl(
             databaseRepository.update(
                 documentPath(id).build(),
                 mapOf(
-                    "members" to FieldEdit.ArrayAdd(newMembers),
+                    "memberIds" to FieldEdit.ArrayAdd(newMembers),
+                    "previousMemberIds" to FieldEdit.ArrayRemove(newMembers)
                 )
             )
         }
@@ -99,7 +98,8 @@ private class ChatRepositoryImpl(
             databaseRepository.update(
                 documentPath(id).build(),
                 mapOf(
-                    "members" to FieldEdit.ArrayRemove(removedMembers),
+                    "memberIds" to FieldEdit.ArrayRemove(removedMembers),
+                    "previousMemberIds" to FieldEdit.ArrayAdd(removedMembers)
                 )
             )
         }
@@ -110,11 +110,4 @@ private class ChatRepositoryImpl(
             databaseRepository.update(documentPath(id).build(), mapOf("name" to name))
         }
     }
-
-    override suspend fun updateChatState(id: String, userId: String, state: ChatState): StoreResult<Chat> {
-        return withContext(dispatcher) {
-            databaseRepository.update(documentPath(id).build(), mapOf("state.$userId" to state))
-        }
-    }
-
 }
