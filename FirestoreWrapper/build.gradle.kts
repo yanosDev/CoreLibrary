@@ -46,8 +46,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.coreLibraryOld)
-    implementation(libs.crashLogOld)
+    implementation(project(mapOf("path" to ":CrashLog")))
+    implementation(project(mapOf("path" to ":CoreLibrary")))
 
     implementation(libs.androidx.core.ktx)
 
