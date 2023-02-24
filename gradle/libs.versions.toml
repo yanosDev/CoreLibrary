@@ -29,7 +29,7 @@ coil = "2.2.0"
 compileSdk = "33"
 compose-compiler = "1.4.2"
 compose-snapshot = "-"
-core-lib = "0.1.37"
+yanos-lib = "0.1.37"
 coroutines = "1.6.4"
 crashlytics = "2.9.4"
 google-maps = "18.1.0"
@@ -114,9 +114,9 @@ androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", 
 androidx-window = { module = "androidx.window:window", version.ref = "androidx-window" }
 coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdkDesugar" }
-coreLibrary = { module = "com.github.yanosDev.CoreLibrary:corelibrary", version.ref = "core-lib" }
-crashLog = { module = "com.github.yanosDev.CoreLibrary:crashlog", version.ref = "core-lib" }
-firestoreWrapper = { module = "com.github.yanosDev.CoreLibrary:firestorewrapper", version.ref = "core-lib" }
+core = { module = "com.github.yanosDev.libraries:core", version.ref = "yanos-lib" }
+crashLog = { module = "com.github.yanosDev.libraries:crashlog", version.ref = "yanos-lib" }
+firestoreWrapper = { module = "com.github.yanosDev.libraries:firestorewrapper", version.ref = "yanos-lib" }
 crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "crashlytics" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 googlemaps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }

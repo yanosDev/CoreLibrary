@@ -21,9 +21,9 @@ dependencyResolutionManagement {
         maven { url = uri("https://jitpack.io") }
     }
 }
-rootProject.name = "Core"
+rootProject.name = "YanosLibraries"
 include(":app")
-include(":CoreLibrary")
-include(":FirestoreWrapper")
-include(":CrashLog")
+include(":core")
+include(":firestorewrapper")
+include(":crashlog")
 include(":chat")

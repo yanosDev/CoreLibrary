@@ -8,10 +8,10 @@ plugins {
     id(libs.plugins.googleServices.get().pluginId)
 }
 android {
-    namespace = "de.yanos.core"
+    namespace = "de.yanos.libraries"
     compileSdk = libs.versions.compileSdk.get().toInt()
     defaultConfig {
-        applicationId = "de.yanos.core"
+        applicationId = "de.yanos.libraries"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
@@ -40,8 +40,8 @@ android {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":FirestoreWrapper")))
-    implementation(project(mapOf("path" to ":CoreLibrary")))
+    implementation(project(mapOf("path" to ":firestorewrapper")))
+    implementation(project(mapOf("path" to ":core")))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)

@@ -4,11 +4,12 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.crashlytics)
     id(libs.plugins.mavenPublish.get().pluginId)
 }
 
 android {
-    namespace = "de.yanos.chat"
+    namespace = "de.yanos.crashlog"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -36,29 +37,21 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":crashlog")))
-    implementation(project(mapOf("path" to ":firestorewrapper")))
-
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
+    val firebaseBom = platform(libs.firebase.bom)
+    implementation(firebaseBom)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.timber)
 }
-
-
 
 publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
-            artifactId = "chat"
+            artifactId = "crashlog"
             version = libs.versions.yanos.lib.get()
 
             afterEvaluate {
