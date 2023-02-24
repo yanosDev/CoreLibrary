@@ -48,6 +48,7 @@ private class MemberRepositoryBuilderImpl : MemberRepositoryBuilder {
 }
 
 interface MemberRepository {
+    suspend fun createMemberState(chatId: String, userId: String, state: ChatState): StoreResult<Member>
     suspend fun updateMemberState(chatId: String, userId: String, state: ChatState): StoreResult<Member>
 }
 
@@ -64,6 +65,12 @@ private class MemberRepositoryImpl(config: MemberRepositoryConfig) : MemberRepos
 
     private fun documentPath(chatId: String, id: String): DocumentPathBuilder<Member> {
         return collectionPath(chatId).document(id)
+    }
+
+    override suspend fun createMemberState(chatId: String, userId: String, state: ChatState): StoreResult<Member> {
+        return withContext(dispatcher) {
+            databaseRepository.update(documentPath(chatId, userId).build(), mapOf("id" to userId, "state" to state))
+        }
     }
 
     override suspend fun updateMemberState(chatId: String, userId: String, state: ChatState): StoreResult<Member> {

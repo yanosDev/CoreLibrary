@@ -5,7 +5,7 @@ data class Message(
     val chatId: String,
     val creatorId: String,
     val text: String?,
-    val media: Media,
+    val media: Media?,
     val refMsgId: String?,
     val state: Map<String, MessageState>,
     val reactions: Map<String, List<String>>,
