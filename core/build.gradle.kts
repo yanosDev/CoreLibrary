@@ -64,6 +64,10 @@ dependencies {
     implementation("com.google.accompanist:accompanist-adaptive:0.29.1-alpha")
     implementation(libs.accompanist.systemuicontroller)
 
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.runtime)
+
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)

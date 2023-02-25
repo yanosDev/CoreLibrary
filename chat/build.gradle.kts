@@ -45,11 +45,16 @@ android {
 }
 
 dependencies {
+    implementation(project(mapOf("path" to ":core")))
     implementation(project(mapOf("path" to ":crashlog")))
     implementation(project(mapOf("path" to ":firestorewrapper")))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.runtime)
 }
 
 

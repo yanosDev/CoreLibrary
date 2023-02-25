@@ -1,4 +1,4 @@
-package de.yanos.chat.domain
+package de.yanos.chat.domain.repository
 
 import de.yanos.chat.data.ChatState
 import de.yanos.chat.data.Member

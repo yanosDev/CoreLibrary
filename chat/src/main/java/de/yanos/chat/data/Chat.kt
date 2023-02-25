@@ -1,7 +1,11 @@
 package de.yanos.chat.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "chat")
 data class Chat(
-    val id: String,
+    @PrimaryKey(autoGenerate = false) val id: String,
     val name: String,
     val memberIds: List<String>,
     val previousMemberIds: List<String>
