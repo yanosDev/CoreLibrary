@@ -47,7 +47,7 @@ interface AuthRepository {
     suspend fun switchAnonymousToGoogle(idToken: String): AuthResult
     suspend fun createPasswordUser(email: String, password: String): AuthResult
     suspend fun loginPasswordUser(email: String, password: String): AuthResult
-    suspend fun loginWithCredential(credential: AuthCredential): AuthResult
+    suspend fun loginWithCredential(idToken: String?): AuthResult
     suspend fun sendPasswordResetEmail(email: String): AuthResult
 }
 
@@ -151,9 +151,10 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
         }
     }
 
-    override suspend fun loginWithCredential(credential: AuthCredential): AuthResult {
+    override suspend fun loginWithCredential(idToken: String?): AuthResult {
         return withContext(dispatcher) {
             try {
+                val credential = GoogleAuthProvider.getCredential(idToken, null)
                 auth.signInWithCredential(credential).await()?.user?.let { user ->
                     AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
                 } ?: AuthResult.Failure("Login failed")

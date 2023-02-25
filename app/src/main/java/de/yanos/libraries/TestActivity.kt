@@ -18,7 +18,7 @@ import com.google.android.gms.auth.api.identity.Identity
 import de.yanos.core.ui.theme.AppTheme
 import de.yanos.core.ui.view.DynamicNavigationScreen
 import de.yanos.core.utils.NavigationDestination
-import de.yanos.firestorewrapper.ui.AuthView
+import de.yanos.libraries.ui.auth.AuthView
 
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package de.yanos.firestorewrapper.ui
+package de.yanos.libraries.ui.auth
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult

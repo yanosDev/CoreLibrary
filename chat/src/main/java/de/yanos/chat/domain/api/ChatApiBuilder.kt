@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalPagingApi::class)
+
 package de.yanos.chat.domain.api
 
 import android.content.Context
+import androidx.paging.ExperimentalPagingApi
 import de.yanos.firestorewrapper.domain.DatabaseRepository
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -9,9 +12,15 @@ interface ChatApiBuilder {
     fun setDatabaseRepository(databaseRepository: DatabaseRepository): ChatApiBuilder
     fun setDispatcher(dispatcher: CoroutineDispatcher): ChatApiBuilder
     fun build(ctx: Context): ChatApi
+
+    companion object {
+        fun Builder(): ChatApiBuilder {
+            return ChatApiBuilderImpl()
+        }
+    }
 }
 
-private class ChatApiBuilderImpl() : ChatApiBuilder {
+private class ChatApiBuilderImpl : ChatApiBuilder {
     private var databaseRepository: DatabaseRepository? = null
     private var dispatcher: CoroutineDispatcher? = null
 

@@ -108,10 +108,11 @@ data class MediaMessageCreationContent(
 
 interface MessageRepository {
     suspend fun createMessage(content: MessageCreationContent): StoreResult<Message>
-    suspend fun updateMessageText(id: String, chatId: String, userId: String, text: String): StoreResult<Message>
+    suspend fun updateMessageText(id: String, chatId: String, text: String): StoreResult<Message>
     suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message>
-    suspend fun addMessageReaction(id: String, chatId: String, userId: String, reactions: String): StoreResult<Message>
+    suspend fun addMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
     suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
+    suspend fun loadMessages(chatId: String, lastMessageId: String?, isNextLoading: Boolean): StoreResult<List<Message>>
 }
 
 private class MessageRepositoryImpl(
@@ -143,19 +144,47 @@ private class MessageRepositoryImpl(
         }
     }
 
-    override suspend fun updateMessageText(id: String, chatId: String, userId: String, text: String): StoreResult<Message> {
-        TODO("Not yet implemented")
+    override suspend fun updateMessageText(id: String, chatId: String, text: String): StoreResult<Message> {
+        return withContext(dispatcher) {
+            databaseRepository.update(
+                documentPath(chatId, id).build(),
+                mapOf("text" to text)
+            )
+        }
     }
 
     override suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message> {
-        TODO("Not yet implemented")
+        return withContext(dispatcher) {
+            databaseRepository.update(
+                documentPath(chatId, id).build(),
+                mapOf("state.$userId" to state)
+            )
+        }
     }
 
-    override suspend fun addMessageReaction(id: String, chatId: String, userId: String, reactions: String): StoreResult<Message> {
-        TODO("Not yet implemented")
+    override suspend fun addMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message> {
+        return withContext(dispatcher) {
+            databaseRepository.update(
+                documentPath(chatId, id).build(),
+                mapOf("state.$userId" to FieldEdit.ArrayAdd(listOf(reaction)))
+            )
+        }
     }
 
     override suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message> {
-        TODO("Not yet implemented")
+        return withContext(dispatcher) {
+            databaseRepository.update(
+                documentPath(chatId, id).build(),
+                mapOf("state.$userId" to FieldEdit.ArrayRemove(listOf(reaction)))
+            )
+        }
+    }
+
+    override suspend fun loadMessages(chatId: String, lastMessageId: String?, isNextLoading: Boolean): StoreResult<List<Message>> {
+        return withContext(dispatcher) {
+            databaseRepository.readList(
+                collectionPath(chatId).build()
+            )
+        }
     }
 }

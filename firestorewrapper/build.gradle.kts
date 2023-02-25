@@ -50,32 +50,13 @@ dependencies {
     implementation(project(mapOf("path" to ":core")))
 
     implementation(libs.androidx.core.ktx)
-
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.navigation.compose)
-
-    val composeBom = platform(libs.androidx.compose.bom)
-    implementation(composeBom)
-    androidTestImplementation(composeBom)
-
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.materialWindow)
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-
-    implementation("androidx.compose.material3:material3:1.1.0-alpha06")
-    implementation("com.google.accompanist:accompanist-adaptive:0.29.1-alpha")
+    implementation(libs.kotlinx.coroutines.android)
 
     val firebaseBom = platform(libs.firebase.bom)
     implementation(firebaseBom)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
-    implementation(libs.google.auth)
-    implementation(libs.google.services)
 
-    implementation(libs.kotlinx.coroutines.android)
 }
 
 publishing {

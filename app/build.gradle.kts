@@ -42,6 +42,8 @@ android {
 dependencies {
     implementation(project(mapOf("path" to ":firestorewrapper")))
     implementation(project(mapOf("path" to ":core")))
+    implementation(project(mapOf("path" to ":crashlog")))
+    implementation(project(mapOf("path" to ":chat")))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
@@ -56,7 +58,4 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
-
-    implementation(libs.google.auth)
-    implementation(libs.google.services)
 }

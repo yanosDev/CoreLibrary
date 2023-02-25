@@ -256,7 +256,7 @@ fun Map<String, Any>.replaceEdits(): Map<String, Any> {
 }
 
 sealed interface StoreResult<out T> {
-    class Load<T>(data: T) : StoreResult<T>
+    class Load<T>(val data: T) : StoreResult<T>
     class Failure<T>(error: String?) : StoreResult<T>
     object Success : StoreResult<Nothing>
 }
