@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import de.yanos.core.R
+import de.yanos.core.utils.NavigationType
 import de.yanos.core.utils.ScreenConfig
 
 val Montserrat = FontFamily(
@@ -189,9 +190,11 @@ fun AppTheme(
         colorScheme = colors,
         typography = typography,
         content = {
+            val config = ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity))
             systemUiController.setSystemBarsColor(color = MaterialTheme.colorScheme.surface)
-            systemUiController.setNavigationBarColor(color = MaterialTheme.colorScheme.surfaceVariant)
-            content(ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity)))
+            if (config.navigationType == NavigationType.BOTTOM)
+                systemUiController.setNavigationBarColor(color = MaterialTheme.colorScheme.surfaceVariant)
+            content(config)
         },
     )
 
