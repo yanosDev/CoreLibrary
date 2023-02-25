@@ -37,12 +37,6 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
 }
 
 dependencies {
@@ -56,7 +50,6 @@ dependencies {
     implementation(firebaseBom)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
-
 }
 
 publishing {

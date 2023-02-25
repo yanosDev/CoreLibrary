@@ -52,6 +52,7 @@ okhttp = "4.10.0"
 robolectric = "4.9.2"
 rome = "1.18.0"
 room = "2.5.0"
+retrofit = "2.9.0"
 secrets = "2.0.1"
 # @keep
 targetSdk = "33"
@@ -109,6 +110,7 @@ androidx-paging-compose = { module = "androidx.paging:paging-compose", version.r
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }
@@ -128,6 +130,7 @@ googlemaps-compose = { module = "com.google.maps.android:maps-compose", version.
 googlemaps-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "google-maps" }
 google-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "google-services" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServicesGradle" }
+gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics-buildtools = { module = "com.google.firebase:firebase-crashlytics-buildtools" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ndk" }

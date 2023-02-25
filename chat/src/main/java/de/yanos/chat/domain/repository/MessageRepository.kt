@@ -51,15 +51,16 @@ sealed interface MessageCreationContent {
     val refMsgId: String?
 
     fun toMap(): Map<String, Any> {
-        return mapOf(
+        return mutableMapOf(
             "ts" to ts,
             "id" to id,
             "chatId" to chatId,
             "creatorId" to creatorId,
-            "refMsgId" to (refMsgId ?: FieldEdit.Delete),
             "state" to mutableMapOf<String, MessageState>().apply { put(creatorId, MessageState.SENT) },
             "reactions" to mutableMapOf<String, List<String>>().apply { put(creatorId, mutableListOf()) }
-        )
+        ).apply {
+            refMsgId?.let { ref -> put("refMsgId", ref) }
+        }
     }
 }
 
@@ -68,7 +69,7 @@ data class TextMessageCreationContent(
     override val chatId: String,
     override val creatorId: String,
     override val ts: Long,
-    override val refMsgId: String?,
+    override val refMsgId: String? = null,
     val text: String,
 ) : MessageCreationContent {
     override fun toMap(): Map<String, Any> {

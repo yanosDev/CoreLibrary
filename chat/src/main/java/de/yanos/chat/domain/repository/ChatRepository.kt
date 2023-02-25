@@ -44,6 +44,7 @@ private class ChatRepositoryBuilderImpl : ChatRepositoryBuilder {
 
 interface ChatRepository {
     suspend fun createChat(id: String, members: List<String>): StoreResult<Chat>
+    suspend fun readChat(id: String): StoreResult<Chat>
     suspend fun addChatMembers(id: String, newMembers: List<String>): StoreResult<Chat>
     suspend fun removeChatMembers(id: String, removedMembers: List<String>): StoreResult<Chat>
     suspend fun updateChatName(id: String, name: String): StoreResult<Chat>
@@ -77,6 +78,12 @@ private class ChatRepositoryImpl(
                     "previousMemberIds" to listOf<String>()
                 )
             )
+        }
+    }
+
+    override suspend fun readChat(id: String): StoreResult<Chat> {
+        return withContext(dispatcher) {
+            databaseRepository.read(documentPath(id).build())
         }
     }
 

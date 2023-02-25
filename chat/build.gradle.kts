@@ -4,6 +4,7 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    id(libs.plugins.kapt.get().pluginId)
     id(libs.plugins.mavenPublish.get().pluginId)
 }
 
@@ -53,11 +54,14 @@ dependencies {
     implementation(libs.androidx.activity.compose)
 
     implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.compiler)
+    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.paging)
 
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.common)
+
+    implementation(libs.gson)
 }
 
 

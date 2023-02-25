@@ -19,6 +19,7 @@ import de.yanos.core.ui.theme.AppTheme
 import de.yanos.core.ui.view.DynamicNavigationScreen
 import de.yanos.core.utils.NavigationDestination
 import de.yanos.libraries.ui.auth.AuthView
+import de.yanos.libraries.ui.chat.ChatView
 
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +61,7 @@ private fun TestNavHost(
             Text(text = TestRoutes.TWO)
         }
         composable(TestRoutes.THREE) {
-            Text(text = TestRoutes.THREE)
+            ChatView()
         }
         composable(TestRoutes.FOUR) {
             Text(text = TestRoutes.FOUR)

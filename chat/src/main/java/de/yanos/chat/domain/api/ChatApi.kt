@@ -5,7 +5,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.room.withTransaction
 import de.yanos.chat.data.Message
 import de.yanos.chat.domain.database.ChatDatabase
 import de.yanos.chat.domain.repository.*
@@ -18,10 +17,10 @@ import de.yanos.firestorewrapper.domain.StoreResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 
 interface ChatApi {
     fun getMessageFlow(chatId: String): Flow<PagingData<Message>>
+    suspend fun createMessage(textMessageCreationContent: TextMessageCreationContent): StoreResult<Message>
 }
 
 @ExperimentalPagingApi
@@ -64,10 +63,14 @@ internal class ChatApiImpl(
 
     override fun getMessageFlow(chatId: String): Flow<PagingData<Message>> {
         return Pager(
-            config = PagingConfig(pageSize = 50),
-            remoteMediator = MessageMediator("", pageUseCase)
+            config = PagingConfig(pageSize = 20),
+            remoteMediator = MessageMediator(chatId, pageUseCase)
         ) {
-            database.messageDao().pagingSource("")
+            database.messageDao().pagingSource(chatId)
         }.flow
+    }
+
+    override suspend fun createMessage(message: TextMessageCreationContent): StoreResult<Message> {
+        return messageRepository.createMessage(message)
     }
 }

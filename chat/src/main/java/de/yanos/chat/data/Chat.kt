@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "chat")
 data class Chat(
-    @PrimaryKey(autoGenerate = false) val id: String,
-    val name: String,
-    val memberIds: List<String>,
-    val previousMemberIds: List<String>
+    @PrimaryKey(autoGenerate = false) val id: String = "",
+    val name: String = "",
+    val memberIds: List<String> = listOf(),
+    val previousMemberIds: List<String> = listOf()
 )

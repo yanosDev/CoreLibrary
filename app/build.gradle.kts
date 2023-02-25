@@ -58,4 +58,11 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.common)
+    implementation(libs.androidx.paging.compose)
+
+    implementation(libs.google.auth)
+    implementation(libs.google.services)
 }

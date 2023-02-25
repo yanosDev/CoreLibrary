@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 
 @Entity("member")
 data class Member(
-    @PrimaryKey(autoGenerate = false) val id: String,
-    val state: ChatState
+    @PrimaryKey(autoGenerate = false) val id: String = "",
+    val state: ChatState = ChatState.ACTIVE
 )
 
 enum class ChatState {

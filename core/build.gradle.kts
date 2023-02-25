@@ -65,7 +65,6 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
 
     implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
 
     androidTestImplementation(libs.junit)
