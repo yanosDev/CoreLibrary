@@ -12,11 +12,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private data class MemberRepositoryConfig(
-    var dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    var databaseRepository: DatabaseRepository = DatabaseRepositoryBuilder.Builder().setDispatcher(dispatcher).build()
-)
-
 interface MemberRepositoryBuilder {
     fun setDatabaseRepository(databaseRepository: DatabaseRepository): MemberRepositoryBuilder
     fun setDispatcher(dispatcher: CoroutineDispatcher): MemberRepositoryBuilder
@@ -31,19 +26,20 @@ interface MemberRepositoryBuilder {
 
 
 private class MemberRepositoryBuilderImpl : MemberRepositoryBuilder {
-    private val config: MemberRepositoryConfig = MemberRepositoryConfig()
+    var dispatcher: CoroutineDispatcher? = null
+    var databaseRepository: DatabaseRepository? = null
     override fun setDatabaseRepository(databaseRepository: DatabaseRepository): MemberRepositoryBuilder {
-        config.databaseRepository = databaseRepository
+        this.databaseRepository = databaseRepository
         return this
     }
 
     override fun setDispatcher(dispatcher: CoroutineDispatcher): MemberRepositoryBuilder {
-        config.dispatcher = dispatcher
+        this.dispatcher = dispatcher
         return this
     }
 
     override fun build(): MemberRepository {
-        return MemberRepositoryImpl(config)
+        return MemberRepositoryImpl(databaseRepository, dispatcher)
     }
 }
 
@@ -52,9 +48,14 @@ interface MemberRepository {
     suspend fun updateMemberState(chatId: String, userId: String, state: ChatState): StoreResult<Member>
 }
 
-private class MemberRepositoryImpl(config: MemberRepositoryConfig) : MemberRepository {
-    private val dispatcher = config.dispatcher
-    private val databaseRepository = config.databaseRepository
+private class MemberRepositoryImpl(
+    dr: DatabaseRepository?,
+    cd: CoroutineDispatcher?
+) : MemberRepository {
+    private val dispatcher = cd ?: Dispatchers.IO
+    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.Builder()
+        .setDispatcher(dispatcher)
+        .enableOfflinePersistence().build()
 
     private fun collectionPath(chatId: String): CollectionPathBuilder<Member> {
         return DatabasePathBuilder

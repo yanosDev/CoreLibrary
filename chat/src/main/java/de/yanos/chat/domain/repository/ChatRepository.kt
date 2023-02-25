@@ -12,11 +12,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private data class ChatRepositoryConfig(
-    var dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    var databaseRepository: DatabaseRepository = DatabaseRepositoryBuilder.Builder().setDispatcher(dispatcher).build()
-)
-
 interface ChatRepositoryBuilder {
     fun setDatabaseRepository(databaseRepository: DatabaseRepository): ChatRepositoryBuilder
     fun setDispatcher(dispatcher: CoroutineDispatcher): ChatRepositoryBuilder
@@ -30,19 +25,20 @@ interface ChatRepositoryBuilder {
 }
 
 private class ChatRepositoryBuilderImpl : ChatRepositoryBuilder {
-    private val config: ChatRepositoryConfig = ChatRepositoryConfig()
+    var dispatcher: CoroutineDispatcher? = null
+    var databaseRepository: DatabaseRepository? = null
     override fun setDatabaseRepository(databaseRepository: DatabaseRepository): ChatRepositoryBuilder {
-        config.databaseRepository = databaseRepository
+        this.databaseRepository = databaseRepository
         return this
     }
 
     override fun setDispatcher(dispatcher: CoroutineDispatcher): ChatRepositoryBuilder {
-        config.dispatcher = dispatcher
+        this.dispatcher = dispatcher
         return this
     }
 
     override fun build(): ChatRepository {
-        return ChatRepositoryImpl(config)
+        return ChatRepositoryImpl(databaseRepository, dispatcher)
     }
 }
 
@@ -54,10 +50,13 @@ interface ChatRepository {
 }
 
 private class ChatRepositoryImpl(
-    config: ChatRepositoryConfig,
+    dr: DatabaseRepository?,
+    cd: CoroutineDispatcher?
 ) : ChatRepository {
-    private val dispatcher = config.dispatcher
-    private val databaseRepository = config.databaseRepository
+    private val dispatcher = cd ?: Dispatchers.IO
+    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.Builder()
+        .setDispatcher(dispatcher)
+        .enableOfflinePersistence().build()
 
     private fun collectionPath(): CollectionPathBuilder<Chat> {
         return DatabasePathBuilder.Builder("chats", Chat::class.java)

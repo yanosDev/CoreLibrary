@@ -13,11 +13,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private data class MessageRepositoryConfig(
-    var dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    var databaseRepository: DatabaseRepository = DatabaseRepositoryBuilder.Builder().setDispatcher(dispatcher).build()
-)
-
 interface MessageRepositoryBuilder {
     fun setDatabaseRepository(databaseRepository: DatabaseRepository): MessageRepositoryBuilder
     fun setDispatcher(dispatcher: CoroutineDispatcher): MessageRepositoryBuilder
@@ -31,19 +26,20 @@ interface MessageRepositoryBuilder {
 }
 
 private class MessageRepositoryBuilderImpl : MessageRepositoryBuilder {
-    private val config: MessageRepositoryConfig = MessageRepositoryConfig()
+    var dispatcher: CoroutineDispatcher? = null
+    var databaseRepository: DatabaseRepository? = null
     override fun setDatabaseRepository(databaseRepository: DatabaseRepository): MessageRepositoryBuilder {
-        config.databaseRepository = databaseRepository
+        this.databaseRepository = databaseRepository
         return this
     }
 
     override fun setDispatcher(dispatcher: CoroutineDispatcher): MessageRepositoryBuilder {
-        config.dispatcher = dispatcher
+        this.dispatcher = dispatcher
         return this
     }
 
     override fun build(): MessageRepository {
-        return MessageRepositoryImpl(config)
+        return MessageRepositoryImpl(databaseRepository, dispatcher)
     }
 }
 
@@ -119,10 +115,13 @@ interface MessageRepository {
 }
 
 private class MessageRepositoryImpl(
-    config: MessageRepositoryConfig
+    dr: DatabaseRepository?,
+    cd: CoroutineDispatcher?
 ) : MessageRepository {
-    private val dispatcher = config.dispatcher
-    private val databaseRepository = config.databaseRepository
+    private val dispatcher = cd ?: Dispatchers.IO
+    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.Builder()
+        .setDispatcher(dispatcher)
+        .enableOfflinePersistence().build()
 
     private fun collectionPath(chatId: String): CollectionPathBuilder<Message> {
         return DatabasePathBuilder

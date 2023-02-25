@@ -15,7 +15,6 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-private data class DatabaseConfig(var isPersistenceEnabled: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
 
 interface DatabaseRepositoryBuilder {
     fun enableOfflinePersistence(): DatabaseRepositoryBuilder
@@ -31,25 +30,25 @@ interface DatabaseRepositoryBuilder {
 }
 
 private class DatabaseRepositoryBuilderImpl : DatabaseRepositoryBuilder {
-    private val config = DatabaseConfig()
-
+    private var isPersistenceEnabled = true
+    private var dispatcher: CoroutineDispatcher? = null
     override fun enableOfflinePersistence(): DatabaseRepositoryBuilder {
-        config.isPersistenceEnabled = true
+        isPersistenceEnabled = true
         return this
     }
 
     override fun disableOfflinePersistence(): DatabaseRepositoryBuilder {
-        config.isPersistenceEnabled = false
+        isPersistenceEnabled = false
         return this
     }
 
     override fun setDispatcher(dispatcher: CoroutineDispatcher): DatabaseRepositoryBuilder {
-        config.dispatcher = dispatcher
+        this.dispatcher = dispatcher
         return this
     }
 
     override fun build(): DatabaseRepository {
-        return DatabaseRepositoryImpl(config)
+        return DatabaseRepositoryImpl(isPersistenceEnabled, dispatcher)
     }
 }
 
@@ -63,14 +62,13 @@ interface DatabaseRepository {
     suspend fun <T> delete(path: DatabasePath<T>): StoreResult<T>
 }
 
-private class DatabaseRepositoryImpl(config: DatabaseConfig) : DatabaseRepository {
+private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: CoroutineDispatcher? = null) : DatabaseRepository {
     private val store: FirebaseFirestore = FirebaseFirestore.getInstance()
-    private val dispatcher = config.dispatcher
+    private val dispatcher: CoroutineDispatcher
 
     init {
-        val settings = FirebaseFirestoreSettings.Builder().apply {
-            isPersistenceEnabled = config.isPersistenceEnabled
-        }.build()
+        dispatcher = cd ?: Dispatchers.IO
+        val settings = FirebaseFirestoreSettings.Builder().apply { this.isPersistenceEnabled = isPersistenceEnabled }.build()
         store.firestoreSettings = settings
     }
 
