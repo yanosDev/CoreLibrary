@@ -25,11 +25,23 @@ internal class MessageMediator(
         state: PagingState<Int, Message>
     ): MediatorResult {
         return try {
-            var isPreviousLoads = true
+            var isPreviousLoads = false
             val loadKey = when (loadType) {
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> {
                     val firstItem =
+                        state.anchorPosition
+                            ?.let { state.closestPageToPosition(it) }
+                            ?.data
+                            ?.firstOrNull()
+                            ?: state.firstItemOrNull() ?: return MediatorResult.Success(
+                                endOfPaginationReached = true
+                            )
+                    isPreviousLoads = true
+                    firstItem
+                }
+                LoadType.APPEND -> {
+                    val lastItem =
                         state.anchorPosition
                             ?.let { state.closestPageToPosition(it) }
                             ?.data
@@ -38,25 +50,13 @@ internal class MessageMediator(
                                 endOfPaginationReached = true
                             )
                     isPreviousLoads = false
-                    firstItem.id
-                }
-                LoadType.APPEND -> {
-                    val lastItem =
-                        state.anchorPosition
-                            ?.let { state.closestPageToPosition(it) }
-                            ?.data
-                            ?.firstOrNull()
-                            ?: state.firstItemOrNull() ?: return MediatorResult.Success(
-                                endOfPaginationReached = true
-                            )
-                    isPreviousLoads = false
-                    lastItem.id
+                    lastItem
                 }
             }
             val response =
                 useCase.loadMessages(
                     chatId = chatId,
-                    referenceId = loadKey,
+                    reference = loadKey,
                     isPreviousLoads = isPreviousLoads,
                     limit = state.config.pageSize.toLong()
                 )

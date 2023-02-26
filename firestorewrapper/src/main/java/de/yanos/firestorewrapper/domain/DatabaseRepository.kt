@@ -115,7 +115,13 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                     .addOnSuccessListener {
                         cont.resume(it.takeIf { it.documents.isNotEmpty() }
                             ?.toObjects(path.clazz)
-                            ?.let { documents -> StoreResult.Load(documents) }
+                            ?.let { documents ->
+                                StoreResult.Load(
+                                    documents,
+                                    startKey = it.documents.firstOrNull(),
+                                    endKey = it.documents.lastOrNull()
+                                )
+                            }
                             ?: StoreResult.Failure("Documents not found")
                         )
                     }
@@ -265,7 +271,7 @@ fun Map<String, Any>.replaceEdits(): Map<String, Any> {
 }
 
 sealed interface StoreResult<out T> {
-    class Load<T>(val data: T) : StoreResult<T>
+    class Load<T>(val data: T, val startKey: Any? = null, val endKey: Any? = null) : StoreResult<T>
     class Failure<T>(error: String?) : StoreResult<T>
     object Success : StoreResult<Nothing>
 }

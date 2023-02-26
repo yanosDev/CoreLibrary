@@ -110,7 +110,7 @@ interface MessageRepository {
     suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message>
     suspend fun addMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
     suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
-    suspend fun loadMessages(chatId: String, referenceId: String?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>>
+    suspend fun loadMessages(chatId: String, reference: Message?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>>
 }
 
 private class MessageRepositoryImpl(
@@ -178,12 +178,12 @@ private class MessageRepositoryImpl(
         }
     }
 
-    override suspend fun loadMessages(chatId: String, referenceId: String?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>> {
+    override suspend fun loadMessages(chatId: String, reference: Message?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>> {
         return withContext(dispatcher) {
             databaseRepository.readList(
                 collectionPath(chatId).apply {
-                    referenceId?.let { refId ->
-                        condition(if (isPreviousLoads) Condition.EndAt(refId) else Condition.StartAt(refId))
+                    reference?.let { ref ->
+                        condition(if (isPreviousLoads) Condition.WhereGreaterThan("ts", ref.ts) else Condition.WhereLessThan("ts", ref.ts))
                     }
                 }
                     .condition(Condition.OrderByDescending("ts"))

@@ -8,7 +8,7 @@ import de.yanos.chat.domain.repository.MessageRepository
 import de.yanos.firestorewrapper.domain.StoreResult
 
 interface PaginateMessagesUseCase {
-    suspend fun loadMessages(chatId: String, referenceId: String?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>>
+    suspend fun loadMessages(chatId: String, reference: Message?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>>
     suspend fun updateLocalMessages(chatId: String, isRefresh: Boolean, result: StoreResult<List<Message>>)
 }
 
@@ -20,11 +20,11 @@ internal class PaginateMessagesUseCaseImpl(
 
     override suspend fun loadMessages(
         chatId: String,
-        referenceId: String?,
+        reference: Message?,
         isPreviousLoads: Boolean,
         limit: Long
     ): StoreResult<List<Message>> {
-        return messageRepository.loadMessages(chatId = chatId, referenceId = referenceId, isPreviousLoads = isPreviousLoads, limit = limit)
+        return messageRepository.loadMessages(chatId = chatId, reference = reference, isPreviousLoads = isPreviousLoads, limit = limit)
     }
 
     override suspend fun updateLocalMessages(

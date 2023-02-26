@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.auth.api.identity.Identity
+import de.yanos.chat.domain.api.ChatApiBuilder
 import de.yanos.core.ui.theme.AppTheme
 import de.yanos.core.ui.view.DynamicNavigationScreen
 import de.yanos.core.utils.NavigationDestination
@@ -23,6 +24,22 @@ import de.yanos.libraries.ui.chat.ChatView
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val api = ChatApiBuilder.Builder().build(this)
+/*
+        lifecycleScope.launch {
+            (0..100).forEach {
+                api.createMessage(
+                    TextMessageCreationContent(
+                        id = UUID.randomUUID().toString(),
+                        chatId = "easDopkS1taIDJqdqjxA",
+                        creatorId = "U1MBPMY4JjNEwyDQ8DahTCvxY6z1",
+                        ts = it.toLong(),
+                        text = it.toString()
+                    )
+                )
+            }
+        }
+        */
         setContent {
             AppTheme(activity = this) { config ->
                 val navController = rememberNavController()
