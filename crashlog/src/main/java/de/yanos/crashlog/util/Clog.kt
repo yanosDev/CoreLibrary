@@ -6,7 +6,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 
 object Clog {
-    fun plant(crashlytics: FirebaseCrashlytics = FirebaseCrashlytics.getInstance()) {
+    private val crashlytics = FirebaseCrashlytics.getInstance()
+    fun plant() {
         Timber.plant(if (BuildConfig.DEBUG) Timber.DebugTree() else ReleaseTree(crashlytics))
     }
 

@@ -8,7 +8,7 @@ import de.yanos.chat.data.Chat
 import de.yanos.chat.data.Member
 import de.yanos.chat.data.Message
 
-@Database(entities = [Chat::class, Message::class, Member::class], version = 1)
+@Database(entities = [Chat::class, Message::class, Member::class], version = 2)
 @androidx.room.TypeConverters(TypeConverters::class)
 abstract class ChatDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao

@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "215898120004-5dnv24siokbvepn1g3m104b6j2d7jfoq.apps.googleusercontent.com",
+          "client_id": "215898120004-ohfmjdpgtfj429o6abelkehmflhgaff8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "de.yanos.libraries",
-            "certificate_hash": "750d4a3641104dea796d0540dbd73a9a96f3eafe"
+            "certificate_hash": "8c0594968115f006d1ce39c5f7f98b12ef62ff07"
           }
         },
         {

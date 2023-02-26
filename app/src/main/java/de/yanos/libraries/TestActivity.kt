@@ -82,7 +82,10 @@ private fun TestNavHost(
             Text(text = TestRoutes.FOUR)
         }
         composable(TestRoutes.LOGIN) {
-            AuthView(clientId = stringResource(id = R.string.client_id), oneTapClient = Identity.getSignInClient(activity), onUserStateChange = {})
+            AuthView(
+                clientId = stringResource(id = R.string.default_web_client_id),
+                oneTapClient = Identity.getSignInClient(activity),
+                onUserStateChange = {})
         }
     }
 }

@@ -3,7 +3,10 @@ package de.yanos.firestorewrapper.domain
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
 import de.yanos.crashlog.util.Clog
-import de.yanos.firestorewrapper.util.*
+import de.yanos.firestorewrapper.util.CollectionPathBuilder
+import de.yanos.firestorewrapper.util.Condition
+import de.yanos.firestorewrapper.util.DatabasePath
+import de.yanos.firestorewrapper.util.FieldEdit
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -238,7 +241,7 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                     refPageItem?.let { item ->
                         if (reverseOrder)
                             condition(Condition.EndBefore(item.createdAt))
-                        else condition(Condition.EndBefore(item.createdAt))
+                        else condition(Condition.StartAfter(item.createdAt))
                     }
                 }
                     .condition(Condition.OrderByDescending("createdAt"))

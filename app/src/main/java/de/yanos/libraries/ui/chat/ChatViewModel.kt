@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import java.util.UUID
+import java.util.*
 
 class ChatViewModel(val chatId: String, val useCase: PaginateMessagesUseCase) : ViewModel() {
     val messages: Flow<PagingData<Message>> = useCase.getMessagePageData(chatId).cachedIn(viewModelScope)
@@ -30,17 +30,15 @@ class ChatViewModel(val chatId: String, val useCase: PaginateMessagesUseCase) : 
 
     fun createNewMessage(value: String, itemCount: Int) {
         viewModelScope.launch {
-            (0..100).forEach {
-                useCase.createMessage(
-                    TextMessageCreationContent(
-                        id = UUID.randomUUID().toString(),
-                        text = it.toString(),
-                        createdAt = it.toLong(),
-                        chatId = chatId,
-                        creatorId = "U1MBPMY4JjNEwyDQ8DahTCvxY6z1",
-                    )
+            useCase.createMessage(
+                TextMessageCreationContent(
+                    id = UUID.randomUUID().toString(),
+                    text = value,
+                    createdAt = System.currentTimeMillis(),
+                    chatId = chatId,
+                    creatorId = "U1MBPMY4JjNEwyDQ8DahTCvxY6z1",
                 )
-            }
+            )
         }
     }
 }

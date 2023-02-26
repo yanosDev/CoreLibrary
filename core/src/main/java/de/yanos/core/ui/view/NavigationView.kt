@@ -109,7 +109,7 @@ fun DynamicContent(
     navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit,
     content: @Composable (Modifier) -> Unit
 ) {
-    Row(modifier = modifier.fillMaxSize()) {
+    Row(modifier = modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
         AnimatedVisibility(visible = config.navigationType == NavigationType.RAIL) {
             DynamicRail(
                 route = route,

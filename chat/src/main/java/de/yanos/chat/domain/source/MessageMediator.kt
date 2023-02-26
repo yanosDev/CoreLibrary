@@ -37,7 +37,9 @@ internal class MessageMediator(
                 reverseOrder = reverseOrder,
                 limit = state.config.pageSize.toLong()
             )
-            messageDao.insert(response.data)
+            withContext(Dispatchers.IO) {
+                messageDao.insert(response.data)
+            }
             MediatorResult.Success(endOfPaginationReached = response.data.isEmpty())
         } catch (e: Exception) {
             MediatorResult.Error(e)

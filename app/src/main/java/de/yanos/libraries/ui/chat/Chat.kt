@@ -5,7 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.SendToMobile
+import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -60,9 +60,16 @@ fun ChatView(
                     modifier = Modifier.fillMaxWidth(),
                     shape = TextFieldDefaults.outlinedShape,
                     value = msgValue.value,
-                    onValueChange = { newValue -> msgValue.value = newValue },
+                    onValueChange = { newValue ->
+                        msgValue.value = newValue
+                    },
                     trailingIcon = {
-                        IconButton(onClick = { executor(msgValue.value) }) { Icon(Icons.Rounded.SendToMobile, contentDescription = "") }
+                        IconButton(onClick = { executor(msgValue.value) }) {
+                            Icon(
+                                Icons.Rounded.Send,
+                                contentDescription = ""
+                            )
+                        }
                     }
                 )
             }
@@ -71,15 +78,18 @@ fun ChatView(
             items = messages,
             key = { it.id }
         ) { message ->
-            Text(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .height(75.dp),
-                text = message?.text ?: "Placeholder",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Divider()
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(if (message?.creatorId == "") MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer)
+                        .height(75.dp)
+                        .align(if (message?.creatorId == "") Alignment.End else Alignment.Start),
+                    text = message?.text ?: "Placeholder",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
 
         when (val state = messages.loadState.refresh) { //FIRST LOAD
