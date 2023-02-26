@@ -215,15 +215,24 @@ fun <T> FirebaseFirestore.readAll(path: DatabasePath<T>): Query {
 
 fun Query.buildConditions(conditions: List<Condition>): Query {
     var query = this
-    for (condition in conditions) query = when (condition) {
-        is Condition.WhereEquals -> query.whereEqualTo(condition.field, condition.value)
-        is Condition.WhereIn -> query.whereIn(condition.field, condition.values)
-        is Condition.WhereGreaterThan -> query.whereGreaterThan(condition.field, condition.value)
-        is Condition.WhereLessThan -> query.whereLessThan(condition.field, condition.value)
-        is Condition.WhereArrayContains -> query.whereArrayContains(condition.field, condition.value)
-        is Condition.OrderByAscending -> query.orderBy(condition.field, Query.Direction.ASCENDING)
-        is Condition.OrderByDescending -> query.orderBy(condition.field, Query.Direction.DESCENDING)
-        is Condition.Limit -> query.limit(condition.count)
+    try {
+        for (condition in conditions.sortedBy { it.priority })
+            query = when (condition) {
+                is Condition.WhereEquals -> query.whereEqualTo(condition.field, condition.value)
+                is Condition.WhereIn -> query.whereIn(condition.field, condition.values)
+                is Condition.WhereGreaterThan -> query.whereGreaterThan(condition.field, condition.value)
+                is Condition.WhereLessThan -> query.whereLessThan(condition.field, condition.value)
+                is Condition.WhereArrayContains -> query.whereArrayContains(condition.field, condition.value)
+                is Condition.OrderByAscending -> query.orderBy(condition.field, Query.Direction.ASCENDING)
+                is Condition.OrderByDescending -> query.orderBy(condition.field, Query.Direction.DESCENDING)
+                is Condition.Limit -> query.limit(condition.count)
+                is Condition.EndAt -> query.endAt(condition.value)
+                is Condition.EndBefore -> query.endBefore(condition.value)
+                is Condition.StartAfter -> query.startAfter(condition.value)
+                is Condition.StartAt -> query.startAt(condition.value)
+            }
+    } catch (e: Exception) {
+        Clog.e(e.stackTraceToString())
     }
     return query
 }

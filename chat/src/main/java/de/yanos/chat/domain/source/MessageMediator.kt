@@ -5,7 +5,6 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import de.yanos.chat.data.Message
-import de.yanos.chat.domain.api.ChatApi
 import de.yanos.chat.domain.usecase.PaginateMessagesUseCase
 import de.yanos.firestorewrapper.domain.StoreResult
 
@@ -26,7 +25,7 @@ internal class MessageMediator(
         state: PagingState<Int, Message>
     ): MediatorResult {
         return try {
-            var isNextLoading = true
+            var isPreviousLoads = true
             val loadKey = when (loadType) {
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> {
@@ -34,11 +33,11 @@ internal class MessageMediator(
                         state.anchorPosition
                             ?.let { state.closestPageToPosition(it) }
                             ?.data
-                            ?.firstOrNull()
-                            ?: return MediatorResult.Success(
+                            ?.lastOrNull()
+                            ?: state.lastItemOrNull() ?: return MediatorResult.Success(
                                 endOfPaginationReached = true
                             )
-                    isNextLoading = false
+                    isPreviousLoads = false
                     firstItem.id
                 }
                 LoadType.APPEND -> {
@@ -47,14 +46,20 @@ internal class MessageMediator(
                             ?.let { state.closestPageToPosition(it) }
                             ?.data
                             ?.firstOrNull()
-                            ?: return MediatorResult.Success(
+                            ?: state.firstItemOrNull() ?: return MediatorResult.Success(
                                 endOfPaginationReached = true
                             )
-                    isNextLoading = false
+                    isPreviousLoads = false
                     lastItem.id
                 }
             }
-            val response = useCase.loadMessages(chatId = chatId, referenceId = loadKey, isNextLoading = isNextLoading, limit = state.config.pageSize)
+            val response =
+                useCase.loadMessages(
+                    chatId = chatId,
+                    referenceId = loadKey,
+                    isPreviousLoads = isPreviousLoads,
+                    limit = state.config.pageSize.toLong()
+                )
             useCase.updateLocalMessages(chatId, loadType == LoadType.REFRESH, response)
             MediatorResult.Success(endOfPaginationReached = (response as? StoreResult.Load)?.data?.isEmpty() ?: true)
         } catch (e: Exception) {

@@ -5,10 +5,7 @@ import de.yanos.chat.data.MessageState
 import de.yanos.firestorewrapper.domain.DatabaseRepository
 import de.yanos.firestorewrapper.domain.DatabaseRepositoryBuilder
 import de.yanos.firestorewrapper.domain.StoreResult
-import de.yanos.firestorewrapper.util.CollectionPathBuilder
-import de.yanos.firestorewrapper.util.DatabasePathBuilder
-import de.yanos.firestorewrapper.util.DocumentPathBuilder
-import de.yanos.firestorewrapper.util.FieldEdit
+import de.yanos.firestorewrapper.util.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -113,7 +110,7 @@ interface MessageRepository {
     suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message>
     suspend fun addMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
     suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
-    suspend fun loadMessages(chatId: String, lastMessageId: String?, isNextLoading: Boolean): StoreResult<List<Message>>
+    suspend fun loadMessages(chatId: String, referenceId: String?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>>
 }
 
 private class MessageRepositoryImpl(
@@ -181,10 +178,16 @@ private class MessageRepositoryImpl(
         }
     }
 
-    override suspend fun loadMessages(chatId: String, lastMessageId: String?, isNextLoading: Boolean): StoreResult<List<Message>> {
+    override suspend fun loadMessages(chatId: String, referenceId: String?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>> {
         return withContext(dispatcher) {
             databaseRepository.readList(
-                collectionPath(chatId).build()
+                collectionPath(chatId).apply {
+                    referenceId?.let { refId ->
+                        condition(if (isPreviousLoads) Condition.EndAt(refId) else Condition.StartAt(refId))
+                    }
+                }
+                    .condition(Condition.OrderByDescending("ts"))
+                    .condition(Condition.Limit(limit)).build()
             )
         }
     }
