@@ -1,7 +1,8 @@
 package de.yanos.core.ui.theme
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -9,6 +10,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
@@ -18,10 +21,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import de.yanos.core.R
-import de.yanos.core.utils.NavigationType
+import de.yanos.core.utils.LocalBackPressedDispatcher
 import de.yanos.core.utils.ScreenConfig
 
 val Montserrat = FontFamily(
@@ -173,10 +177,11 @@ fun AppTheme(
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun AppTheme(
-    activity: Activity,
+    activity: ComponentActivity,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable (ScreenConfig) -> Unit
+    content: @Composable (Modifier, ScreenConfig) -> Unit
 ) {
+    WindowCompat.setDecorFitsSystemWindows(activity.window, false)
     @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
     val colors =
         if (useDarkTheme) {
@@ -190,11 +195,20 @@ fun AppTheme(
         colorScheme = colors,
         typography = typography,
         content = {
-            val config = ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity))
-            systemUiController.setSystemBarsColor(color = MaterialTheme.colorScheme.surface)
-            if (config.navigationType == NavigationType.BOTTOM)
-                systemUiController.setNavigationBarColor(color = MaterialTheme.colorScheme.surfaceVariant)
-            content(config)
+            CompositionLocalProvider(
+                LocalBackPressedDispatcher provides activity.onBackPressedDispatcher
+            ) {
+                val config = ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity))
+                systemUiController.setSystemBarsColor(color = MaterialTheme.colorScheme.surface)
+                content(
+                    Modifier.windowInsetsPadding(
+                        WindowInsets
+                            .navigationBars
+                            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                    ),
+                    config
+                )
+            }
         },
     )
 

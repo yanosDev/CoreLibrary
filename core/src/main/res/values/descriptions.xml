@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="d_edit">Edit</string>
-    <string name="d_add">Add</string>
-    <string name="d_nav_drawer">Navigation Drawer</string>
+    <string name="edit_desc">Edit</string>
+    <string name="add_desc">Add</string>
+    <string name="nav_drawer_desc">Navigation Drawer</string>
+    <string name="emoji_selector_desc">Emoji selector</string>
+    <string name="emoji_selector_bt_desc">Show Emoji selector</string>
+    <string name="dm_desc">Direct Message</string>
+    <string name="attach_photo_desc">Attach Photo</string>
+    <string name="map_selector_desc">Location selector</string>
+    <string name="videochat_desc">Start videochat</string>
+    <string name="textfield_desc">Text input</string>
 </resources>

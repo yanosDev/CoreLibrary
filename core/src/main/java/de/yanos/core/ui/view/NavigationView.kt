@@ -1,7 +1,6 @@
 package de.yanos.core.ui.view
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -100,7 +99,7 @@ fun DynamicNavigationScreen(
 }
 
 @Composable
-fun DynamicContent(
+private fun DynamicContent(
     modifier: Modifier = Modifier,
     config: ScreenConfig,
     route: String,
@@ -119,31 +118,32 @@ fun DynamicContent(
                 onDrawerClicked = onDrawerClicked,
             )
         }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            content(Modifier.weight(1f))
-            AnimatedVisibility(visible = config.navigationType == NavigationType.BOTTOM) {
-                DynamicBottomBar(
-                    route = route,
-                    destinations = destinations,
-                    navigateToTopLevelDestination = navigateToTopLevelDestination
-                )
+        Surface(tonalElevation = 0.dp) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                content(Modifier.weight(1f))
+                AnimatedVisibility(visible = config.navigationType == NavigationType.BOTTOM) {
+                    DynamicBottomBar(
+                        route = route,
+                        destinations = destinations,
+                        navigateToTopLevelDestination = navigateToTopLevelDestination
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun DynamicBottomBar(
+private fun DynamicBottomBar(
     modifier: Modifier = Modifier,
     route: String,
     destinations: List<NavigationDestination.TopDestination>,
     navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit
 ) {
-    NavigationBar(modifier = modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.surfaceVariant) {
+    NavigationBar(modifier = modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.background) {
         destinations.forEach { destination ->
             NavigationBarItem(
                 selected = route == destination.route,
@@ -160,7 +160,7 @@ fun DynamicBottomBar(
 }
 
 @Composable
-fun DynamicRail(
+private fun DynamicRail(
     modifier: Modifier = Modifier,
     config: ScreenConfig, onDrawerClicked: () -> Unit,
     route: String,
@@ -185,7 +185,7 @@ fun DynamicRail(
                         icon = {
                             Icon(
                                 imageVector = Icons.Default.Menu,
-                                contentDescription = stringResource(id = R.string.d_nav_drawer)
+                                contentDescription = stringResource(id = R.string.nav_drawer_desc)
                             )
                         }
                     )
@@ -197,7 +197,7 @@ fun DynamicRail(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.d_edit),
+                            contentDescription = stringResource(id = R.string.edit_desc),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -241,7 +241,6 @@ private fun PermanentNavigationDrawerContent(
     PermanentDrawerSheet(modifier = modifier.sizeIn(minWidth = 200.dp, maxWidth = 300.dp)) {
         Layout(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
             content = {
                 Column(
@@ -283,7 +282,6 @@ private fun ModalNavigationDrawerContent(
     ModalDrawerSheet {
         Layout(
             modifier = modifier
-                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
             content = {
                 Column(
@@ -306,7 +304,7 @@ private fun ModalNavigationDrawerContent(
                         IconButton(onClick = onDrawerClicked) {
                             Icon(
                                 imageVector = Icons.Default.MenuOpen,
-                                contentDescription = stringResource(id = R.string.d_nav_drawer)
+                                contentDescription = stringResource(id = R.string.nav_drawer_desc)
                             )
                         }
                     }
@@ -380,6 +378,6 @@ private fun MeasureScope.measurePolicy(config: ScreenConfig, measurableList: Lis
     }
 }
 
-enum class LayoutType {
+private enum class LayoutType {
     HEADER, CONTENT
 }

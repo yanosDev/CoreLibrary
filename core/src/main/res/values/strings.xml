@@ -3,4 +3,8 @@
     <string name="app_name">YanosLibraries</string>
 
     <string name="fab_add_note">Add</string>
+    <string name="message_hint">Your Message here</string>
+    <string name="message_send">Send</string>
+    <string name="emojis_label">Emojis</string>
+    <string name="stickers_label">Stickers</string>
 </resources>

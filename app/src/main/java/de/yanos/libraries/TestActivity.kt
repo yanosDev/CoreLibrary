@@ -9,12 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.auth.api.identity.Identity
-import de.yanos.chat.domain.api.ChatApiBuilder
 import de.yanos.core.ui.theme.AppTheme
 import de.yanos.core.ui.view.DynamicNavigationScreen
 import de.yanos.core.utils.NavigationDestination
@@ -24,32 +24,22 @@ import de.yanos.libraries.ui.chat.ChatView
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val api = ChatApiBuilder.builder().build(this)
-/*
-        lifecycleScope.launch {
-            (0..100).forEach {
-                api.createMessage(
-                    TextMessageCreationContent(
-                        id = UUID.randomUUID().toString(),
-                        chatId = "easDopkS1taIDJqdqjxA",
-                        creatorId = "U1MBPMY4JjNEwyDQ8DahTCvxY6z1",
-                        ts = it.toLong(),
-                        text = it.toString()
-                    )
-                )
-            }
-        }
-        */
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
-            AppTheme(activity = this) { config ->
+            AppTheme(activity = this@TestActivity) { modifier, config ->
                 val navController = rememberNavController()
-                DynamicNavigationScreen(config = config, destinations = TEST_DESTINATIONS, navController = navController) { modifier ->
+                DynamicNavigationScreen(
+                    config = config,
+                    destinations = TEST_DESTINATIONS,
+                    navController = navController
+                ) { contentModifier ->
                     //NavHost Here
                     TestNavHost(
-                        modifier = modifier,
-                        startRoute = TEST_DESTINATIONS.last().route,
+                        modifier = contentModifier,
+                        startRoute = TestRoutes.THREE,
                         navController = navController,
-                        this
+                        this@TestActivity
                     )
                 }
             }

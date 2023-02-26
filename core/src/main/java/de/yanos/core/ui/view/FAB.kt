@@ -47,11 +47,11 @@ fun Fab(
 
 @Composable
 fun EditFab(modifier: Modifier = Modifier, isLoading: Boolean = false, onClick: () -> Unit) =
-    Fab(modifier = modifier, icon = Icons.Default.Edit, content = stringResource(id = R.string.d_edit), isLoading = isLoading, onClick = onClick)
+    Fab(modifier = modifier, icon = Icons.Default.Edit, content = stringResource(id = R.string.edit_desc), isLoading = isLoading, onClick = onClick)
 
 @Composable
 fun AddFab(modifier: Modifier = Modifier, isLoading: Boolean, onClick: () -> Unit) =
-    Fab(modifier = modifier, icon = Icons.Default.Add, content = stringResource(id = R.string.d_add), isLoading = isLoading, onClick = onClick)
+    Fab(modifier = modifier, icon = Icons.Default.Add, content = stringResource(id = R.string.add_desc), isLoading = isLoading, onClick = onClick)
 
 @Composable
 fun ExFab(
@@ -92,8 +92,8 @@ fun EditExFab(modifier: Modifier = Modifier, isLoading: Boolean = false, onClick
     ExFab(
         modifier = modifier,
         icon = Icons.Default.Edit,
-        content = stringResource(id = R.string.d_edit),
-        text = stringResource(id = R.string.d_edit),
+        content = stringResource(id = R.string.edit_desc),
+        text = stringResource(id = R.string.edit_desc),
         isLoading = isLoading,
         onClick = onClick
     )
@@ -103,8 +103,8 @@ fun AddExFab(modifier: Modifier = Modifier, isLoading: Boolean, onClick: () -> U
     ExFab(
         modifier = modifier,
         icon = Icons.Default.Add,
-        text = stringResource(id = R.string.d_add),
-        content = stringResource(id = R.string.d_add),
+        text = stringResource(id = R.string.add_desc),
+        content = stringResource(id = R.string.add_desc),
         isLoading = isLoading,
         onClick = onClick
     )
