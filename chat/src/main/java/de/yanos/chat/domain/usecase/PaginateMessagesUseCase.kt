@@ -1,24 +1,31 @@
+@file:OptIn(ExperimentalPagingApi::class)
+
 package de.yanos.chat.domain.usecase
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.room.RoomDatabase
-import androidx.room.withTransaction
 import de.yanos.chat.data.Message
 import de.yanos.chat.domain.database.MessageDao
+import de.yanos.chat.domain.repository.MessageCreationContent
 import de.yanos.chat.domain.repository.MessageRepository
-import de.yanos.firestorewrapper.domain.PageKey
+import de.yanos.chat.domain.source.MessageMediator
 import de.yanos.firestorewrapper.domain.StoreResult
 import kotlinx.coroutines.flow.Flow
 
 interface PaginateMessagesUseCase {
+    fun getMessagePageData(chatId: String): Flow<PagingData<Message>>
+    suspend fun createMessage(messageContent: MessageCreationContent): StoreResult<Message>
+    suspend fun messagesHaveChanged(chatId: String): Flow<StoreResult<List<Message>>>
+
     suspend fun paginateMessages(
         chatId: String,
-        key: Long?,
+        refMsg: Message?,
         isPreviousLoads: Boolean,
         limit: Long
-    ): StoreResult.Load<Pair<List<Message>, PageKey>>
-
-    suspend fun updateLocalMessages(chatId: String, isRefresh: Boolean, messages: List<Message>)
-    suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>>
+    ): StoreResult.Load<List<Message>>
 }
 
 internal class PaginateMessagesUseCaseImpl(
@@ -29,27 +36,29 @@ internal class PaginateMessagesUseCaseImpl(
 
     override suspend fun paginateMessages(
         chatId: String,
-        key: Long?,
+        refMsg: Message?,
         isPreviousLoads: Boolean,
         limit: Long
-    ): StoreResult.Load<Pair<List<Message>, PageKey>> {
-        return messageRepository.getMessagePage(chatId = chatId, key = key, isPreviousLoads = isPreviousLoads, limit = limit)
+    ): StoreResult.Load<List<Message>> {
+        return messageRepository.getMessagePage(chatId = chatId, refMsg = refMsg, reverseOrder = isPreviousLoads, limit = limit)
     }
 
-    override suspend fun updateLocalMessages(
-        chatId: String,
-        isRefresh: Boolean,
-        messages: List<Message>
-    ) {
-        with(database) {
-            withTransaction {
-                messageDao.insert(messages)
-            }
-        }
-    }
-
-    override suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>> {
+    override suspend fun messagesHaveChanged(chatId: String): Flow<StoreResult<List<Message>>> {
         return messageRepository.listenToChanges(chatId)
     }
+
+    override fun getMessagePageData(chatId: String): Flow<PagingData<Message>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20, initialLoadSize = 2),
+            remoteMediator = MessageMediator(chatId, messageDao, messageRepository)
+        ) {
+            messageDao.pagingSource(chatId)
+        }.flow
+    }
+
+    override suspend fun createMessage(message: MessageCreationContent): StoreResult<Message> {
+        return messageRepository.createMessage(message)
+    }
+
 
 }

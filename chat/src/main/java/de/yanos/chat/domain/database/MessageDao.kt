@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
 import de.yanos.chat.data.Message
-import de.yanos.corelibrary.base.BaseDao
+import de.yanos.core.base.BaseDao
 
 @Dao
 interface MessageDao : BaseDao<Message> {

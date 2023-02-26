@@ -19,10 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 
 interface ChatApi {
-    fun getMessageFlow(chatId: String): Flow<PagingData<Message>>
-    suspend fun createMessage(textMessageCreationContent: TextMessageCreationContent): StoreResult<Message>
-    suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>>
-
+    val pageUseCase: PaginateMessagesUseCase
 }
 
 @ExperimentalPagingApi
@@ -35,7 +32,7 @@ internal class ChatApiImpl(
     private val chatRepository: ChatRepository
     private val database: ChatDatabase
     private val messageRepository: MessageRepository
-    private val pageUseCase: PaginateMessagesUseCase
+    override val pageUseCase: PaginateMessagesUseCase
 
     init {
         val dispatcher = cd ?: Dispatchers.IO
@@ -61,22 +58,5 @@ internal class ChatApiImpl(
             .build()
         database = ChatDatabase.getInstance(ctx)
         pageUseCase = PaginateMessagesUseCaseImpl(database, database.messageDao(), messageRepository)
-    }
-
-    override fun getMessageFlow(chatId: String): Flow<PagingData<Message>> {
-        return Pager(
-            config = PagingConfig(pageSize = 10),
-            remoteMediator = MessageMediator(chatId, pageUseCase) { database.messageDao().pagingSource(chatId).invalidate() }
-        ) {
-            database.messageDao().pagingSource(chatId)
-        }.flow
-    }
-
-    override suspend fun createMessage(message: TextMessageCreationContent): StoreResult<Message> {
-        return messageRepository.createMessage(message)
-    }
-
-    override suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>> {
-        return pageUseCase.listenToChanges(chatId)
     }
 }

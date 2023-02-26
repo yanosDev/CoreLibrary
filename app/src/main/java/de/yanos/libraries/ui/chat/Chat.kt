@@ -33,7 +33,7 @@ fun ChatView(
         chatId = chatId,
         ChatApiBuilder.builder().build(
             LocalContext.current.applicationContext
-        )
+        ).pageUseCase
     )
     val messages = viewModel.messages.collectAsLazyPagingItems()
     val executor = { msg: String -> scope.launch { viewModel.createNewMessage(msg, messages.itemCount) } }
