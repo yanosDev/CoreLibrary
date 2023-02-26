@@ -4,10 +4,12 @@ import de.yanos.chat.data.Message
 import de.yanos.chat.data.MessageState
 import de.yanos.firestorewrapper.domain.DatabaseRepository
 import de.yanos.firestorewrapper.domain.DatabaseRepositoryBuilder
+import de.yanos.firestorewrapper.domain.PageKey
 import de.yanos.firestorewrapper.domain.StoreResult
 import de.yanos.firestorewrapper.util.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 interface MessageRepositoryBuilder {
@@ -110,7 +112,12 @@ interface MessageRepository {
     suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message>
     suspend fun addMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
     suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
-    suspend fun loadMessages(chatId: String, reference: Message?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>>
+    suspend fun loadMessages(
+        chatId: String,
+        key: PageKey?,
+        isPreviousLoads: Boolean,
+        limit: Long
+    ): StoreResult<Pair<List<Message>, PageKey>>
 }
 
 private class MessageRepositoryImpl(
@@ -178,17 +185,14 @@ private class MessageRepositoryImpl(
         }
     }
 
-    override suspend fun loadMessages(chatId: String, reference: Message?, isPreviousLoads: Boolean, limit: Long): StoreResult<List<Message>> {
+    override suspend fun loadMessages(
+        chatId: String,
+        key: PageKey?,
+        isPreviousLoads: Boolean,
+        limit: Long
+    ): StoreResult<Pair<List<Message>, PageKey>> {
         return withContext(dispatcher) {
-            databaseRepository.readList(
-                collectionPath(chatId).apply {
-                    reference?.let { ref ->
-                        condition(if (isPreviousLoads) Condition.WhereGreaterThan("ts", ref.ts) else Condition.WhereLessThan("ts", ref.ts))
-                    }
-                }
-                    .condition(Condition.OrderByDescending("ts"))
-                    .condition(Condition.Limit(limit)).build()
-            )
+            databaseRepository.paginateList(collectionPath(chatId), key, "ts", limit)
         }
     }
 }
