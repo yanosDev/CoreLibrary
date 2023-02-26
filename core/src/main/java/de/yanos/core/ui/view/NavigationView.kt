@@ -118,7 +118,7 @@ private fun DynamicContent(
                 onDrawerClicked = onDrawerClicked,
             )
         }
-        Surface(tonalElevation = 0.dp) {
+        Surface {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -143,9 +143,18 @@ private fun DynamicBottomBar(
     destinations: List<NavigationDestination.TopDestination>,
     navigateToTopLevelDestination: (NavigationDestination.TopDestination) -> Unit
 ) {
-    NavigationBar(modifier = modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.background) {
+    NavigationBar(
+        modifier = modifier
+            .fillMaxWidth(),
+        tonalElevation = 1.dp,
+        containerColor = MaterialTheme.colorScheme.surface,
+        windowInsets = WindowInsets
+            .navigationBars
+            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+    ) {
         destinations.forEach { destination ->
             NavigationBarItem(
+                modifier = Modifier.navigationBarsPadding(),
                 selected = route == destination.route,
                 onClick = { navigateToTopLevelDestination(destination) },
                 icon = {

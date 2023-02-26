@@ -148,7 +148,7 @@ private fun SelectorExpanded(
         }
     }
 
-    Surface(tonalElevation = 2.dp) {
+    Surface(tonalElevation = 1.dp) {
         when (currentSelector) {
             InputSelector.EMOJI -> EmojiSelector(onTextAdded, focusRequester)
             InputSelector.DM -> Text(text = "Not yet")

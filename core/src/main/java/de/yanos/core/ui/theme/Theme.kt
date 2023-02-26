@@ -200,12 +200,15 @@ fun AppTheme(
             ) {
                 val config = ScreenConfig(calculateWindowSizeClass(activity), calculateDisplayFeatures(activity))
                 systemUiController.setSystemBarsColor(color = MaterialTheme.colorScheme.surface)
+                systemUiController.setNavigationBarColor(color = MaterialTheme.colorScheme.surface.copy(alpha = 0.0f))
                 content(
-                    Modifier.windowInsetsPadding(
-                        WindowInsets
-                            .navigationBars
-                            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                    ),
+                    Modifier
+                        .windowInsetsPadding(
+                            WindowInsets
+                                .navigationBars
+                                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                        )
+                        .imePadding(),
                     config
                 )
             }
