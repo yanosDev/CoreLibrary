@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface PaginateMessagesUseCase {
     fun getMessagePageData(chatId: String): Flow<PagingData<Message>>
-    suspend fun createMessage(messageContent: MessageCreationContent): StoreResult<Message>
+    suspend fun createMessage(message: MessageCreationContent): StoreResult<Message>
     suspend fun messagesHaveChanged(chatId: String): Flow<StoreResult<List<Message>>>
 
     suspend fun paginateMessages(

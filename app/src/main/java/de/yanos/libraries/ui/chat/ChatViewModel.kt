@@ -30,15 +30,17 @@ class ChatViewModel(val chatId: String, val useCase: PaginateMessagesUseCase) : 
 
     fun createNewMessage(value: String, itemCount: Int) {
         viewModelScope.launch {
-            useCase.createMessage(
-                TextMessageCreationContent(
-                    id = UUID.randomUUID().toString(),
-                    text = value,
-                    createdAt = itemCount.toLong(),
-                    chatId = chatId,
-                    creatorId = "U1MBPMY4JjNEwyDQ8DahTCvxY6z1",
+            (0..100).forEach {
+                useCase.createMessage(
+                    TextMessageCreationContent(
+                        id = UUID.randomUUID().toString(),
+                        text = it.toString(),
+                        createdAt = it.toLong(),
+                        chatId = chatId,
+                        creatorId = "U1MBPMY4JjNEwyDQ8DahTCvxY6z1",
+                    )
                 )
-            )
+            }
         }
     }
 }

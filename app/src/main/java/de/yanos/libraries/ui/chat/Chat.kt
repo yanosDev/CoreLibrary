@@ -1,6 +1,7 @@
 package de.yanos.libraries.ui.chat
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -42,16 +43,30 @@ fun ChatView(
         refreshExecutor()
     }
 
-
-    LazyColumn(modifier = modifier, reverseLayout = true) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        reverseLayout = true
+    ) {
         stickyHeader {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
                 val msgValue = remember { mutableStateOf("") }
-                TextField(value = msgValue.value, onValueChange = { newValue -> msgValue.value = newValue })
-                IconButton(onClick = { executor(msgValue.value) }) { Icon(Icons.Rounded.SendToMobile, contentDescription = "") }
+                TextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = TextFieldDefaults.outlinedShape,
+                    value = msgValue.value,
+                    onValueChange = { newValue -> msgValue.value = newValue },
+                    trailingIcon = {
+                        IconButton(onClick = { executor(msgValue.value) }) { Icon(Icons.Rounded.SendToMobile, contentDescription = "") }
+                    }
+                )
             }
         }
-
         items(
             items = messages,
             key = { it.id }

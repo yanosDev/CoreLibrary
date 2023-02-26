@@ -225,7 +225,6 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
         }
     }
 
-
     override suspend fun <T> paginateList(
         path: CollectionPathBuilder<T>,
         refPageItem: T?,
