@@ -114,10 +114,12 @@ interface MessageRepository {
     suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
     suspend fun loadMessages(
         chatId: String,
-        key: PageKey?,
+        key: Long?,
         isPreviousLoads: Boolean,
         limit: Long
-    ): StoreResult<Pair<List<Message>, PageKey>>
+    ): StoreResult.Load<Pair<List<Message>, PageKey>>
+
+    suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>>
 }
 
 private class MessageRepositoryImpl(
@@ -187,12 +189,23 @@ private class MessageRepositoryImpl(
 
     override suspend fun loadMessages(
         chatId: String,
-        key: PageKey?,
+        key: Long?,
         isPreviousLoads: Boolean,
         limit: Long
-    ): StoreResult<Pair<List<Message>, PageKey>> {
+    ): StoreResult.Load<Pair<List<Message>, PageKey>> {
         return withContext(dispatcher) {
-            databaseRepository.paginateList(collectionPath(chatId), key, "ts", limit)
+            databaseRepository.paginateList(collectionPath(chatId), key, isPreviousLoads, "ts", limit)
+        }
+    }
+
+    override suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>> {
+        return withContext(dispatcher) {
+            databaseRepository.subscribeChanges(
+                collectionPath(chatId).condition(Condition.OrderByDescending("ts"))
+                    .condition(
+                        Condition.Limit(1000)
+                    ).build()
+            )
         }
     }
 }

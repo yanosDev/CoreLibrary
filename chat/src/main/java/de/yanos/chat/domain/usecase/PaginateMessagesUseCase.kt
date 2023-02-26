@@ -12,12 +12,13 @@ import kotlinx.coroutines.flow.Flow
 interface PaginateMessagesUseCase {
     suspend fun paginateMessages(
         chatId: String,
-        reference: PageKey?,
+        key: Long?,
         isPreviousLoads: Boolean,
         limit: Long
-    ): StoreResult<Pair<List<Message>, PageKey>>
+    ): StoreResult.Load<Pair<List<Message>, PageKey>>
 
     suspend fun updateLocalMessages(chatId: String, isRefresh: Boolean, messages: List<Message>)
+    suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>>
 }
 
 internal class PaginateMessagesUseCaseImpl(
@@ -28,10 +29,10 @@ internal class PaginateMessagesUseCaseImpl(
 
     override suspend fun paginateMessages(
         chatId: String,
-        key: PageKey?,
+        key: Long?,
         isPreviousLoads: Boolean,
         limit: Long
-    ): StoreResult<Pair<List<Message>, PageKey>> {
+    ): StoreResult.Load<Pair<List<Message>, PageKey>> {
         return messageRepository.loadMessages(chatId = chatId, key = key, isPreviousLoads = isPreviousLoads, limit = limit)
     }
 
@@ -45,6 +46,10 @@ internal class PaginateMessagesUseCaseImpl(
                 messageDao.insert(messages)
             }
         }
+    }
+
+    override suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>> {
+        return messageRepository.listenToChanges(chatId)
     }
 
 }

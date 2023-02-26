@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.Flow
 interface ChatApi {
     fun getMessageFlow(chatId: String): Flow<PagingData<Message>>
     suspend fun createMessage(textMessageCreationContent: TextMessageCreationContent): StoreResult<Message>
+    suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>>
+
 }
 
 @ExperimentalPagingApi
@@ -63,8 +65,8 @@ internal class ChatApiImpl(
 
     override fun getMessageFlow(chatId: String): Flow<PagingData<Message>> {
         return Pager(
-            config = PagingConfig(pageSize = 20),
-            remoteMediator = MessageMediator(chatId, pageUseCase)
+            config = PagingConfig(pageSize = 10),
+            remoteMediator = MessageMediator(chatId, pageUseCase) { database.messageDao().pagingSource(chatId).invalidate() }
         ) {
             database.messageDao().pagingSource(chatId)
         }.flow
@@ -72,5 +74,9 @@ internal class ChatApiImpl(
 
     override suspend fun createMessage(message: TextMessageCreationContent): StoreResult<Message> {
         return messageRepository.createMessage(message)
+    }
+
+    override suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>> {
+        return pageUseCase.listenToChanges(chatId)
     }
 }

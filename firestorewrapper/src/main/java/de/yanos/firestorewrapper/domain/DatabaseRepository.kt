@@ -56,12 +56,14 @@ interface DatabaseRepository {
     suspend fun <T> readList(path: DatabasePath<T>): StoreResult<List<T>>
     suspend fun <T> subscribe(path: DatabasePath<T>): Flow<StoreResult<T>>
     suspend fun <T> subscribeList(path: DatabasePath<T>): Flow<StoreResult<List<T>>>
+    suspend fun <T> subscribeChanges(path: DatabasePath<T>): Flow<StoreResult<List<T>>>
     suspend fun <T> paginateList(
         path: CollectionPathBuilder<T>,
-        key: PageKey?,
+        key: Long?,
+        isPreviousLoad: Boolean,
         orderBy: String,
         limit: Long
-    ): StoreResult<Pair<List<T>, PageKey>>
+    ): StoreResult.Load<Pair<List<T>, PageKey>>
 
     suspend fun <T> update(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T>
     suspend fun <T> delete(path: DatabasePath<T>): StoreResult<T>
@@ -175,17 +177,41 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
         }
     }
 
+    override suspend fun <T> subscribeChanges(path: DatabasePath<T>): Flow<StoreResult<List<T>>> {
+        return withContext(dispatcher) {
+            callbackFlow {
+                val subscriber = store.readAll(path).addSnapshotListener { snapshot, error ->
+                    val result = when {
+                        error != null -> StoreResult.Failure(error.stackTraceToString())
+                        snapshot?.documentChanges?.isNotEmpty() != true -> StoreResult.Failure("Document not found")
+                        else -> snapshot.documentChanges
+                            .map { documentChange -> documentChange.document.toObject(path.clazz) }
+                            .let { documents -> StoreResult.Load(documents) }
+                    }
+                    trySend(result)
+                }
+                awaitClose {
+                    subscriber.remove()
+                }
+            }
+        }
+    }
+
     override suspend fun <T> paginateList(
         path: CollectionPathBuilder<T>,
-        key: PageKey?,
+        key: Long?,
+        isPreviousLoad: Boolean,
         orderBy: String,
         limit: Long
-    ): StoreResult<Pair<List<T>, PageKey>> {
+    ): StoreResult.Load<Pair<List<T>, PageKey>> {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
+                val errorLoad: StoreResult.Load<Pair<List<T>, PageKey>> = StoreResult.Load(Pair(listOf(), PageKeyImpl(null, 0L, 0L)))
                 store.readAll(path.apply {
-                    (key as? PageKeyImpl)?.let { key ->
-                        condition(Condition.StartAfter(key.ts))
+                    key?.let { ts ->
+                        if (isPreviousLoad)
+                            condition(Condition.EndBefore(ts))
+                        else condition(Condition.EndBefore(ts))
                     }
                 }
                     .condition(Condition.OrderByDescending(orderBy))
@@ -201,17 +227,18 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                                         documents,
                                         PageKeyImpl(
                                             it.documents.lastOrNull(),
+                                            it.documents.firstOrNull()?.get("ts") as? Long ?: 0L,
                                             it.documents.lastOrNull()?.get("ts") as? Long ?: 0L
                                         )
                                     )
                                 )
                             }
-                            ?: StoreResult.Failure("Documents not found")
+                            ?: errorLoad
                         )
                     }
                     .addOnFailureListener {
                         Clog.e(it.stackTraceToString())
-                        cont.resume(StoreResult.Failure(it.localizedMessage))
+                        cont.resume(errorLoad)
                     }
             }
         }
@@ -313,12 +340,13 @@ fun Map<String, Any>.replaceEdits(): Map<String, Any> {
 
 sealed interface StoreResult<out T> {
     class Load<T>(val data: T) : StoreResult<T>
-    class Failure<T>(error: String?) : StoreResult<T>
+    class Failure<T>(val error: String?) : StoreResult<T>
     object Success : StoreResult<Nothing>
 }
 
 interface PageKey {
-    val ts: Long
+    val startTs: Long
+    val endTs: Long
 }
 
-data class PageKeyImpl(val documentSnapshot: DocumentSnapshot?, override val ts: Long) : PageKey
+data class PageKeyImpl(val documentSnapshot: DocumentSnapshot?, override val startTs: Long, override val endTs: Long) : PageKey
