@@ -4,7 +4,6 @@ import de.yanos.chat.data.Message
 import de.yanos.chat.data.MessageState
 import de.yanos.firestorewrapper.domain.DatabaseRepository
 import de.yanos.firestorewrapper.domain.DatabaseRepositoryBuilder
-import de.yanos.firestorewrapper.domain.PageKey
 import de.yanos.firestorewrapper.domain.StoreResult
 import de.yanos.firestorewrapper.util.*
 import kotlinx.coroutines.CoroutineDispatcher
@@ -12,13 +11,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-interface MessageRepositoryBuilder {
+sealed interface MessageRepositoryBuilder {
     fun setDatabaseRepository(databaseRepository: DatabaseRepository): MessageRepositoryBuilder
     fun setDispatcher(dispatcher: CoroutineDispatcher): MessageRepositoryBuilder
     fun build(): MessageRepository
 
     companion object {
-        fun Builder(): MessageRepositoryBuilder {
+        fun builder(): MessageRepositoryBuilder {
             return MessageRepositoryBuilderImpl()
         }
     }
@@ -127,7 +126,7 @@ private class MessageRepositoryImpl(
     cd: CoroutineDispatcher?
 ) : MessageRepository {
     private val dispatcher = cd ?: Dispatchers.IO
-    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.Builder()
+    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.builder()
         .setDispatcher(dispatcher)
         .enableOfflinePersistence().build()
 

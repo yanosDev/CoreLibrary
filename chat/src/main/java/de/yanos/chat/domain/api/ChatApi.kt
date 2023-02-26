@@ -41,21 +41,21 @@ internal class ChatApiImpl(
         val dispatcher = cd ?: Dispatchers.IO
         val databaseRepository =
             dr
-                ?: DatabaseRepositoryBuilder.Builder()
+                ?: DatabaseRepositoryBuilder.builder()
                     .setDispatcher(dispatcher)
                     .enableOfflinePersistence().build()
         chatRepository = ChatRepositoryBuilder
-            .Builder()
+            .builder()
             .setDispatcher(dispatcher)
             .setDatabaseRepository(databaseRepository)
             .build()
         messageRepository = MessageRepositoryBuilder
-            .Builder()
+            .builder()
             .setDispatcher(dispatcher)
             .setDatabaseRepository(databaseRepository)
             .build()
         memberRepository = MemberRepositoryBuilder
-            .Builder()
+            .builder()
             .setDispatcher(dispatcher)
             .setDatabaseRepository(databaseRepository)
             .build()

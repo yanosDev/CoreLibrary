@@ -18,7 +18,7 @@ interface MemberRepositoryBuilder {
     fun build(): MemberRepository
 
     companion object {
-        fun Builder(): MemberRepositoryBuilder {
+        fun builder(): MemberRepositoryBuilder {
             return MemberRepositoryBuilderImpl()
         }
     }
@@ -53,7 +53,7 @@ private class MemberRepositoryImpl(
     cd: CoroutineDispatcher?
 ) : MemberRepository {
     private val dispatcher = cd ?: Dispatchers.IO
-    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.Builder()
+    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.builder()
         .setDispatcher(dispatcher)
         .enableOfflinePersistence().build()
 

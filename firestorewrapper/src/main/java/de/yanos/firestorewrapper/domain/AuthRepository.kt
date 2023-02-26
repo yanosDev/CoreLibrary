@@ -15,7 +15,7 @@ interface AuthRepositoryBuilder {
     fun build(): AuthRepository
 
     companion object {
-        fun Builder(): AuthRepositoryBuilder {
+        fun builder(): AuthRepositoryBuilder {
             return AuthRepositoryBuilderImpl()
         }
     }

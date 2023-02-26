@@ -14,14 +14,14 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 
-interface DatabaseRepositoryBuilder {
+sealed interface DatabaseRepositoryBuilder {
     fun enableOfflinePersistence(): DatabaseRepositoryBuilder
     fun disableOfflinePersistence(): DatabaseRepositoryBuilder
     fun setDispatcher(dispatcher: CoroutineDispatcher): DatabaseRepositoryBuilder
     fun build(): DatabaseRepository
 
     companion object {
-        fun Builder(): DatabaseRepositoryBuilder {
+        fun builder(): DatabaseRepositoryBuilder {
             return DatabaseRepositoryBuilderImpl()
         }
     }
@@ -57,16 +57,14 @@ interface DatabaseRepository {
     suspend fun <T> subscribe(path: DatabasePath<T>): Flow<StoreResult<T>>
     suspend fun <T> subscribeList(path: DatabasePath<T>): Flow<StoreResult<List<T>>>
     suspend fun <T> subscribeChanges(path: DatabasePath<T>): Flow<StoreResult<List<T>>>
-    suspend fun <T> paginateList(
-        path: CollectionPathBuilder<T>,
-        key: Long?,
-        isPreviousLoad: Boolean,
-        orderBy: String,
-        limit: Long
-    ): StoreResult.Load<Pair<List<T>, PageKey>>
-
     suspend fun <T> update(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T>
     suspend fun <T> delete(path: DatabasePath<T>): StoreResult<T>
+    suspend fun paginateList(
+        path: CollectionPathBuilder<PaginationItem>,
+        refPageItem: PaginationItem?,
+        isPreviousLoad: Boolean,
+        limit: Long
+    ): StoreResult.Load<List<PaginationItem>>
 }
 
 private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: CoroutineDispatcher? = null) : DatabaseRepository {
@@ -197,53 +195,6 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
         }
     }
 
-    override suspend fun <T> paginateList(
-        path: CollectionPathBuilder<T>,
-        key: Long?,
-        isPreviousLoad: Boolean,
-        orderBy: String,
-        limit: Long
-    ): StoreResult.Load<Pair<List<T>, PageKey>> {
-        return withContext(dispatcher) {
-            suspendCoroutine { cont ->
-                val errorLoad: StoreResult.Load<Pair<List<T>, PageKey>> = StoreResult.Load(Pair(listOf(), PageKeyImpl(null, 0L, 0L)))
-                store.readAll(path.apply {
-                    key?.let { ts ->
-                        if (isPreviousLoad)
-                            condition(Condition.EndBefore(ts))
-                        else condition(Condition.EndBefore(ts))
-                    }
-                }
-                    .condition(Condition.OrderByDescending(orderBy))
-                    .condition(Condition.Limit(limit)).build()
-                )
-                    .get()
-                    .addOnSuccessListener {
-                        cont.resume(it.takeIf { it.documents.isNotEmpty() }
-                            ?.toObjects(path.clazz)
-                            ?.let { documents ->
-                                StoreResult.Load(
-                                    Pair(
-                                        documents,
-                                        PageKeyImpl(
-                                            it.documents.lastOrNull(),
-                                            it.documents.firstOrNull()?.get("ts") as? Long ?: 0L,
-                                            it.documents.lastOrNull()?.get("ts") as? Long ?: 0L
-                                        )
-                                    )
-                                )
-                            }
-                            ?: errorLoad
-                        )
-                    }
-                    .addOnFailureListener {
-                        Clog.e(it.stackTraceToString())
-                        cont.resume(errorLoad)
-                    }
-            }
-        }
-    }
-
     override suspend fun <T> update(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T> {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
@@ -273,21 +224,57 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
             }
         }
     }
+
+
+    override suspend fun paginateList(
+        path: CollectionPathBuilder<PaginationItem>,
+        refPageItem: PaginationItem?,
+        isPreviousLoad: Boolean,
+        limit: Long
+    ): StoreResult.Load<List<PaginationItem>> {
+        return withContext(dispatcher) {
+            suspendCoroutine { cont ->
+                val errorLoad = StoreResult.Load(listOf<PaginationItem>())
+                store.readAll(path.apply {
+                    refPageItem?.let { item ->
+                        if (isPreviousLoad)
+                            condition(Condition.EndBefore(item.createdAt))
+                        else condition(Condition.EndBefore(item.createdAt))
+                    }
+                }
+                    .condition(Condition.OrderByDescending("createdAt"))
+                    .condition(Condition.Limit(limit)).build()
+                )
+                    .get()
+                    .addOnSuccessListener {
+                        cont.resume(it.takeIf { it.documents.isNotEmpty() }
+                            ?.toObjects(path.clazz)
+                            ?.let { documents -> StoreResult.Load(documents) }
+                            ?: errorLoad
+                        )
+                    }
+                    .addOnFailureListener {
+                        Clog.e(it.stackTraceToString())
+                        cont.resume(errorLoad)
+                    }
+            }
+        }
+    }
 }
 
-fun <T> FirebaseFirestore.create(path: DatabasePath<T>, values: Map<String, Any>): Task<Void> {
+private fun <T> FirebaseFirestore.create(path: DatabasePath<T>, values: Map<String, Any>): Task<Void> {
     return document(path.buildPath()).set(values)
 }
 
-fun <T> FirebaseFirestore.read(path: DatabasePath<T>): DocumentReference {
+private fun <T> FirebaseFirestore.read(path: DatabasePath<T>): DocumentReference {
     return document(path.buildPath())
 }
 
-fun <T> FirebaseFirestore.readAll(path: DatabasePath<T>): Query {
+private fun <T> FirebaseFirestore.readAll(path: DatabasePath<T>): Query {
     return collection(path.buildPath()).buildConditions(path.conditions)
 }
 
-fun Query.buildConditions(conditions: List<Condition>): Query {
+private fun Query.buildConditions(conditions: List<Condition>): Query {
     var query = this
     try {
         for (condition in conditions.sortedBy { it.priority })
@@ -311,19 +298,19 @@ fun Query.buildConditions(conditions: List<Condition>): Query {
     return query
 }
 
-fun <T> FirebaseFirestore.update(path: DatabasePath<T>, values: Map<String, Any>): Task<Void> {
+private fun <T> FirebaseFirestore.update(path: DatabasePath<T>, values: Map<String, Any>): Task<Void> {
     return document(path.buildPath()).update(values.replaceEdits())
 }
 
-fun <T> FirebaseFirestore.delete(path: DatabasePath<T>): Task<Void> {
+private fun <T> FirebaseFirestore.delete(path: DatabasePath<T>): Task<Void> {
     return document(path.buildPath()).delete()
 }
 
-fun <T> DatabasePath<T>.buildPath(): String {
+private fun <T> DatabasePath<T>.buildPath(): String {
     return path.joinToString(separator = "/")
 }
 
-fun Map<String, Any>.replaceEdits(): Map<String, Any> {
+private fun Map<String, Any>.replaceEdits(): Map<String, Any> {
     val newMap = mutableMapOf<String, Any>()
     forEach { (field, value) ->
         newMap[field] = {
@@ -344,9 +331,6 @@ sealed interface StoreResult<out T> {
     object Success : StoreResult<Nothing>
 }
 
-interface PageKey {
-    val startTs: Long
-    val endTs: Long
+interface PaginationItem {
+    val createdAt: Long
 }
-
-data class PageKeyImpl(val documentSnapshot: DocumentSnapshot?, override val startTs: Long, override val endTs: Long) : PageKey

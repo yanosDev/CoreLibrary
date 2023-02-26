@@ -24,7 +24,7 @@ import de.yanos.libraries.ui.chat.ChatView
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val api = ChatApiBuilder.Builder().build(this)
+        val api = ChatApiBuilder.builder().build(this)
 /*
         lifecycleScope.launch {
             (0..100).forEach {

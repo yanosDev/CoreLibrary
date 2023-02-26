@@ -31,7 +31,7 @@ fun ChatView(
     val scope = rememberCoroutineScope()
     val viewModel = ChatViewModel(
         chatId = chatId,
-        ChatApiBuilder.Builder().build(
+        ChatApiBuilder.builder().build(
             LocalContext.current.applicationContext
         )
     )

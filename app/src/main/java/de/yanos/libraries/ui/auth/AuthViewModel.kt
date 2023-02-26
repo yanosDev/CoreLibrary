@@ -25,9 +25,9 @@ internal class AuthViewModel(
         viewModelScope.launch {
             userIsLoggedIn = authRepository.isLoggedIn()
         }
-        signUpRequest = BeginSignInRequest.builder()
+        signUpRequest = BeginSignInRequest.Builder()
             .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
                     .setSupported(true)
                     // Your server's client ID, not your Android client ID.
                     .setServerClientId(clientId)
@@ -36,14 +36,14 @@ internal class AuthViewModel(
                     .build()
             )
             .build()
-        signInRequest = BeginSignInRequest.builder()
+        signInRequest = BeginSignInRequest.Builder()
             .setPasswordRequestOptions(
-                BeginSignInRequest.PasswordRequestOptions.builder()
+                BeginSignInRequest.PasswordRequestOptions.Builder()
                     .setSupported(true)
                     .build()
             )
             .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
                     .setSupported(true)
                     // Your server's client ID, not your Android client ID.
                     .setServerClientId(clientId)

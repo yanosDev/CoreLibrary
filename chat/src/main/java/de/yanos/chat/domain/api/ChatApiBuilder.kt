@@ -14,7 +14,7 @@ interface ChatApiBuilder {
     fun build(ctx: Context): ChatApi
 
     companion object {
-        fun Builder(): ChatApiBuilder {
+        fun builder(): ChatApiBuilder {
             return ChatApiBuilderImpl()
         }
     }

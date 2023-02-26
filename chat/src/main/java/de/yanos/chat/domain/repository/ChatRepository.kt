@@ -18,7 +18,7 @@ interface ChatRepositoryBuilder {
     fun build(): ChatRepository
 
     companion object {
-        fun Builder(): ChatRepositoryBuilder {
+        fun builder(): ChatRepositoryBuilder {
             return ChatRepositoryBuilderImpl()
         }
     }
@@ -55,7 +55,7 @@ private class ChatRepositoryImpl(
     cd: CoroutineDispatcher?
 ) : ChatRepository {
     private val dispatcher = cd ?: Dispatchers.IO
-    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.Builder()
+    private val databaseRepository = dr ?: DatabaseRepositoryBuilder.builder()
         .setDispatcher(dispatcher)
         .enableOfflinePersistence().build()
 

@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: SignInClient, onUserStateChange: (AuthResult) -> Unit) {
     val scope = rememberCoroutineScope()
-    val authViewModel = AuthViewModel(clientId, AuthRepositoryBuilder.Builder().build())
+    val authViewModel = AuthViewModel(clientId, AuthRepositoryBuilder.builder().build())
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))

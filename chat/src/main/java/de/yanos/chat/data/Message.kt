@@ -3,6 +3,7 @@ package de.yanos.chat.data
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import de.yanos.firestorewrapper.domain.PaginationItem
 
 @Entity(tableName = "messages")
 data class Message(
@@ -14,8 +15,8 @@ data class Message(
     val refMsgId: String? = null,
     val state: Map<String, MessageState> = mapOf(),
     val reactions: Map<String, List<String>> = mapOf(),
-    val ts: Long = 0L,
-)
+    override val createdAt: Long = 0L,
+) : PaginationItem
 
 data class Media(
     val id: String,
