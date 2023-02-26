@@ -34,7 +34,7 @@ class ChatViewModel(val chatId: String, val chatApi: ChatApi) : ViewModel() {
                 TextMessageCreationContent(
                     id = UUID.randomUUID().toString(),
                     text = value,
-                    ts = itemCount.toLong(),
+                    createdAt = itemCount.toLong(),
                     chatId = chatId,
                     creatorId = "U1MBPMY4JjNEwyDQ8DahTCvxY6z1",
                 )

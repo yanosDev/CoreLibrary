@@ -42,7 +42,7 @@ private class MessageRepositoryBuilderImpl : MessageRepositoryBuilder {
 }
 
 sealed interface MessageCreationContent {
-    val ts: Long
+    val createdAt: Long
     val id: String
     val chatId: String
     val creatorId: String
@@ -50,7 +50,7 @@ sealed interface MessageCreationContent {
 
     fun toMap(): Map<String, Any> {
         return mutableMapOf(
-            "ts" to ts,
+            "createdAt" to createdAt,
             "id" to id,
             "chatId" to chatId,
             "creatorId" to creatorId,
@@ -66,7 +66,7 @@ data class TextMessageCreationContent(
     override val id: String,
     override val chatId: String,
     override val creatorId: String,
-    override val ts: Long,
+    override val createdAt: Long,
     override val refMsgId: String? = null,
     val text: String,
 ) : MessageCreationContent {
@@ -81,7 +81,7 @@ data class MediaMessageCreationContent(
     override val id: String,
     override val chatId: String,
     override val creatorId: String,
-    override val ts: Long,
+    override val createdAt: Long,
     override val refMsgId: String?,
     val mediaId: String,
     val mediaName: String,
@@ -111,12 +111,12 @@ interface MessageRepository {
     suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message>
     suspend fun addMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
     suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message>
-    suspend fun loadMessages(
+    suspend fun getMessagePage(
         chatId: String,
-        key: Long?,
-        isPreviousLoads: Boolean,
+        refMsg: Message?,
+        reverseOrder: Boolean,
         limit: Long
-    ): StoreResult.Load<Pair<List<Message>, PageKey>>
+    ): StoreResult.Load<List<Message>>
 
     suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>>
 }
@@ -144,8 +144,8 @@ private class MessageRepositoryImpl(
     override suspend fun createMessage(content: MessageCreationContent): StoreResult<Message> {
         return withContext(dispatcher) {
             databaseRepository.create(
-                documentPath(content.chatId, content.id).build(),
-                content.toMap()
+                path = documentPath(content.chatId, content.id).build(),
+                values = content.toMap()
             )
         }
     }
@@ -153,8 +153,8 @@ private class MessageRepositoryImpl(
     override suspend fun updateMessageText(id: String, chatId: String, text: String): StoreResult<Message> {
         return withContext(dispatcher) {
             databaseRepository.update(
-                documentPath(chatId, id).build(),
-                mapOf("text" to text)
+                path = documentPath(chatId, id).build(),
+                values = mapOf("text" to text)
             )
         }
     }
@@ -162,8 +162,8 @@ private class MessageRepositoryImpl(
     override suspend fun updateMessageState(id: String, chatId: String, userId: String, state: MessageState): StoreResult<Message> {
         return withContext(dispatcher) {
             databaseRepository.update(
-                documentPath(chatId, id).build(),
-                mapOf("state.$userId" to state)
+                path = documentPath(chatId, id).build(),
+                values = mapOf("state.$userId" to state)
             )
         }
     }
@@ -171,8 +171,8 @@ private class MessageRepositoryImpl(
     override suspend fun addMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message> {
         return withContext(dispatcher) {
             databaseRepository.update(
-                documentPath(chatId, id).build(),
-                mapOf("state.$userId" to FieldEdit.ArrayAdd(listOf(reaction)))
+                path = documentPath(chatId, id).build(),
+                values = mapOf("state.$userId" to FieldEdit.ArrayAdd(listOf(reaction)))
             )
         }
     }
@@ -180,27 +180,32 @@ private class MessageRepositoryImpl(
     override suspend fun removeMessageReaction(id: String, chatId: String, userId: String, reaction: String): StoreResult<Message> {
         return withContext(dispatcher) {
             databaseRepository.update(
-                documentPath(chatId, id).build(),
-                mapOf("state.$userId" to FieldEdit.ArrayRemove(listOf(reaction)))
+                path = documentPath(chatId, id).build(),
+                values = mapOf("state.$userId" to FieldEdit.ArrayRemove(listOf(reaction)))
             )
         }
     }
 
-    override suspend fun loadMessages(
+    override suspend fun getMessagePage(
         chatId: String,
-        key: Long?,
-        isPreviousLoads: Boolean,
+        refMsg: Message?,
+        reverseOrder: Boolean,
         limit: Long
-    ): StoreResult.Load<Pair<List<Message>, PageKey>> {
+    ): StoreResult.Load<List<Message>> {
         return withContext(dispatcher) {
-            databaseRepository.paginateList(collectionPath(chatId), key, isPreviousLoads, "ts", limit)
+            databaseRepository.paginateList(
+                path = collectionPath(chatId),
+                refPageItem = refMsg,
+                reverseOrder = reverseOrder,
+                limit = limit
+            )
         }
     }
 
     override suspend fun listenToChanges(chatId: String): Flow<StoreResult<List<Message>>> {
         return withContext(dispatcher) {
             databaseRepository.subscribeChanges(
-                collectionPath(chatId).condition(Condition.OrderByDescending("ts"))
+                collectionPath(chatId).condition(Condition.OrderByDescending("createdAt"))
                     .condition(
                         Condition.Limit(1000)
                     ).build()

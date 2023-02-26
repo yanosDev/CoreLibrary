@@ -8,7 +8,7 @@ import de.yanos.corelibrary.base.BaseDao
 
 @Dao
 interface MessageDao : BaseDao<Message> {
-    @Query("SELECT * FROM messages WHERE chatId LIKE :chatId ORDER BY ts DESC")
+    @Query("SELECT * FROM messages WHERE chatId LIKE :chatId ORDER BY createdAt DESC")
     fun pagingSource(chatId: String): PagingSource<Int, Message>
 
     @Query("DELETE FROM messages WHERE chatId LIKE :chatId")

@@ -33,7 +33,7 @@ internal class PaginateMessagesUseCaseImpl(
         isPreviousLoads: Boolean,
         limit: Long
     ): StoreResult.Load<Pair<List<Message>, PageKey>> {
-        return messageRepository.loadMessages(chatId = chatId, key = key, isPreviousLoads = isPreviousLoads, limit = limit)
+        return messageRepository.getMessagePage(chatId = chatId, key = key, isPreviousLoads = isPreviousLoads, limit = limit)
     }
 
     override suspend fun updateLocalMessages(

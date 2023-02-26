@@ -59,12 +59,12 @@ interface DatabaseRepository {
     suspend fun <T> subscribeChanges(path: DatabasePath<T>): Flow<StoreResult<List<T>>>
     suspend fun <T> update(path: DatabasePath<T>, values: Map<String, Any>): StoreResult<T>
     suspend fun <T> delete(path: DatabasePath<T>): StoreResult<T>
-    suspend fun paginateList(
-        path: CollectionPathBuilder<PaginationItem>,
-        refPageItem: PaginationItem?,
-        isPreviousLoad: Boolean,
+    suspend fun <T> paginateList(
+        path: CollectionPathBuilder<T>,
+        refPageItem: T?,
+        reverseOrder: Boolean,
         limit: Long
-    ): StoreResult.Load<List<PaginationItem>>
+    ): StoreResult.Load<List<T>> where T : PaginationItem
 }
 
 private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: CoroutineDispatcher? = null) : DatabaseRepository {
@@ -226,18 +226,18 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
     }
 
 
-    override suspend fun paginateList(
-        path: CollectionPathBuilder<PaginationItem>,
-        refPageItem: PaginationItem?,
-        isPreviousLoad: Boolean,
+    override suspend fun <T> paginateList(
+        path: CollectionPathBuilder<T>,
+        refPageItem: T?,
+        reverseOrder: Boolean,
         limit: Long
-    ): StoreResult.Load<List<PaginationItem>> {
+    ): StoreResult.Load<List<T>> where T : PaginationItem {
         return withContext(dispatcher) {
             suspendCoroutine { cont ->
-                val errorLoad = StoreResult.Load(listOf<PaginationItem>())
+                val errorLoad = StoreResult.Load(listOf<T>())
                 store.readAll(path.apply {
                     refPageItem?.let { item ->
-                        if (isPreviousLoad)
+                        if (reverseOrder)
                             condition(Condition.EndBefore(item.createdAt))
                         else condition(Condition.EndBefore(item.createdAt))
                     }
