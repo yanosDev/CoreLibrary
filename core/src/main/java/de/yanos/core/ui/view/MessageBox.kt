@@ -1,7 +1,6 @@
 package de.yanos.core.ui.view
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
@@ -98,14 +98,17 @@ fun MessageBox(
                     if (focused) {
                         currentInputSelector = InputSelector.NONE
                         messageEventCallback(MessageBoxEvent.ResetScroll)
-
                     }
                     textFieldFocusState = focused
                 },
                 focusState = textFieldFocusState
             )
             UserInputSelector(
-                onSelectorChange = { currentInputSelector = it },
+                onSelectorChange = { newSelector ->
+                    currentInputSelector = if (currentInputSelector != newSelector)
+                        newSelector
+                    else InputSelector.NONE
+                },
                 sendMessageEnabled = textState.text.isNotBlank(),
                 onMessageSent = {
                     messageEventCallback(MessageBoxEvent.SendTestMessage(textState.text))
@@ -141,38 +144,29 @@ private fun SelectorExpanded(
     onCloseRequested: () -> Unit,
     onEmojiClicked: (String) -> Unit
 ) {
-    if (currentSelector == InputSelector.NONE) return
-
     // Request focus to force the TextField to lose it
     val focusRequester = FocusRequester()
     // If the selector is shown, always request focus to trigger a TextField.onFocusChange.
     SideEffect {
         if (currentSelector == InputSelector.EMOJI) {
-            focusRequester.requestFocus()
+            //    focusRequester.requestFocus()
         }
     }
 
-    Surface(tonalElevation = 1.dp) {
-        when (currentSelector) {
-            InputSelector.EMOJI -> EmojiSelector(onEmojiClicked, focusRequester)
-            InputSelector.DM -> Text(text = "Not yet")
-            InputSelector.PICTURE -> FunctionalityNotAvailablePanel()
-            InputSelector.MAP -> FunctionalityNotAvailablePanel()
-            InputSelector.PHONE -> FunctionalityNotAvailablePanel()
-            else -> {
-                throw NotImplementedError()
-            }
-        }
+    Surface(tonalElevation = 0.dp) {
+        if (currentSelector == InputSelector.DM) Text(text = "Not yet")
+        EmojiSelector(currentSelector, onEmojiClicked, focusRequester)
+        FunctionalityNotAvailablePanel(currentSelector)
     }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun FunctionalityNotAvailablePanel() {
+fun FunctionalityNotAvailablePanel(currentSelector: InputSelector) {
     AnimatedVisibility(
-        visibleState = remember { MutableTransitionState(false).apply { targetState = true } },
-        enter = expandHorizontally() + fadeIn(),
-        exit = shrinkHorizontally() + fadeOut()
+        visible = currentSelector != InputSelector.EMOJI && currentSelector != InputSelector.DM && currentSelector != InputSelector.NONE,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
     ) {
         Column(
             modifier = Modifier
@@ -327,7 +321,8 @@ private fun UserInputText(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(64.dp)
+            .padding(top = 8.dp)
             .semantics {
                 contentDescription = a11ylabel
                 keyboardShownProperty = keyboardShown
@@ -339,10 +334,10 @@ private fun UserInputText(
                 modifier = Modifier
                     .height(56.dp)
                     .weight(1f)
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .align(Alignment.Bottom)
                     .background(
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(14.dp)
                     )
             ) {
@@ -385,44 +380,60 @@ private fun UserInputText(
 
 @Composable
 fun EmojiSelector(
+    currentSelector: InputSelector,
     onEmojiClicked: (String) -> Unit,
     focusRequester: FocusRequester
 ) {
     var selected by remember { mutableStateOf(EmojiStickerSelector.EMOJI) }
-
     val a11yLabel = stringResource(id = R.string.emoji_selector_desc)
-    Column(
-        modifier = Modifier
-            .focusRequester(focusRequester) // Requests focus when the Emoji selector is displayed
-            // Make the emoji selector focusable so it can steal focus from TextField
-            .focusTarget()
-            .semantics { contentDescription = a11yLabel }
+    val density = LocalDensity.current
+    AnimatedVisibility(
+        visible = currentSelector == InputSelector.EMOJI,
+        enter = slideInVertically {
+            // Slide in from 40 dp from the top.
+            with(density) { -40.dp.roundToPx() }
+        } + expandVertically(
+            // Expand from the top.
+            expandFrom = Alignment.Top
+        ) + fadeIn(
+            // Fade in with the initial alpha of 0.3f.
+            initialAlpha = 0.3f
+        ),
+        exit = slideOutVertically() + shrinkVertically() + fadeOut()
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .focusRequester(focusRequester) // Requests focus when the Emoji selector is displayed
+                // Make the emoji selector focusable so it can steal focus from TextField
+                .focusTarget()
+                .semantics { contentDescription = a11yLabel }
         ) {
-            ExtendedSelectorInnerButton(
-                text = stringResource(id = R.string.emojis_label),
-                onClick = { selected = EmojiStickerSelector.EMOJI },
-                selected = true,
-                modifier = Modifier.weight(1f)
-            )
-            ExtendedSelectorInnerButton(
-                text = stringResource(id = R.string.stickers_label),
-                onClick = { selected = EmojiStickerSelector.STICKER },
-                selected = false,
-                modifier = Modifier.weight(1f)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+            ) {
+                ExtendedSelectorInnerButton(
+                    text = stringResource(id = R.string.emojis_label),
+                    onClick = { selected = EmojiStickerSelector.EMOJI },
+                    selected = true,
+                    modifier = Modifier.weight(1f)
+                )
+                ExtendedSelectorInnerButton(
+                    text = stringResource(id = R.string.stickers_label),
+                    onClick = { selected = EmojiStickerSelector.STICKER },
+                    selected = false,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                EmojiTable(onEmojiClicked, modifier = Modifier.padding(8.dp))
+            }
         }
-        Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            EmojiTable(onEmojiClicked, modifier = Modifier.padding(8.dp))
-        }
-    }
-    if (selected == EmojiStickerSelector.STICKER) {
-        TextButton(onClick = { selected = EmojiStickerSelector.EMOJI }) {
-            Text(text = "Not yet")
+        if (selected == EmojiStickerSelector.STICKER) {
+            TextButton(onClick = { selected = EmojiStickerSelector.EMOJI }) {
+                Text(text = "Not yet")
+            }
         }
     }
 }
