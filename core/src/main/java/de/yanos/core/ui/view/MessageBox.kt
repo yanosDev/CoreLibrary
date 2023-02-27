@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +29,7 @@ import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -36,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.yanos.core.R
 import de.yanos.core.utils.BackPressHandler
+import kotlin.math.min
 
 enum class InputSelector {
     NONE,
@@ -54,6 +57,7 @@ enum class EmojiStickerSelector {
 sealed interface MessageBoxEvent {
     object ResetScroll : MessageBoxEvent
     data class SendTestMessage(val text: String) : MessageBoxEvent
+    data class OnEmojiClicked(val emoji: String) : MessageBoxEvent
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -81,7 +85,7 @@ fun MessageBox(
         Column(modifier = modifier) {
             SelectorExpanded(
                 onCloseRequested = dismissKeyboard,
-                onTextAdded = { textState = textState.addText(it) },
+                onEmojiClicked = { messageEventCallback(MessageBoxEvent.OnEmojiClicked(it)) },
                 currentSelector = currentInputSelector
             )
             UserInputText(
@@ -135,7 +139,7 @@ private fun TextFieldValue.addText(newString: String): TextFieldValue {
 private fun SelectorExpanded(
     currentSelector: InputSelector,
     onCloseRequested: () -> Unit,
-    onTextAdded: (String) -> Unit
+    onEmojiClicked: (String) -> Unit
 ) {
     if (currentSelector == InputSelector.NONE) return
 
@@ -150,7 +154,7 @@ private fun SelectorExpanded(
 
     Surface(tonalElevation = 1.dp) {
         when (currentSelector) {
-            InputSelector.EMOJI -> EmojiSelector(onTextAdded, focusRequester)
+            InputSelector.EMOJI -> EmojiSelector(onEmojiClicked, focusRequester)
             InputSelector.DM -> Text(text = "Not yet")
             InputSelector.PICTURE -> FunctionalityNotAvailablePanel()
             InputSelector.MAP -> FunctionalityNotAvailablePanel()
@@ -201,7 +205,7 @@ private fun UserInputSelector(
 ) {
     Row(
         modifier = modifier
-            .height(72.dp)
+            .height(56.dp)
             .wrapContentHeight()
             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -323,7 +327,7 @@ private fun UserInputText(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(56.dp)
             .semantics {
                 contentDescription = a11ylabel
                 keyboardShownProperty = keyboardShown
@@ -333,9 +337,14 @@ private fun UserInputText(
         Surface {
             Box(
                 modifier = Modifier
-                    .height(64.dp)
+                    .height(56.dp)
                     .weight(1f)
+                    .padding(horizontal = 8.dp)
                     .align(Alignment.Bottom)
+                    .background(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(14.dp)
+                    )
             ) {
                 var lastFocusState by remember { mutableStateOf(false) }
                 BasicTextField(
@@ -357,7 +366,7 @@ private fun UserInputText(
                     ),
                     maxLines = 1,
                     cursorBrush = SolidColor(LocalContentColor.current),
-                    textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface)
                 )
 
                 if (textFieldValue.text.isEmpty() && !focusState) {
@@ -366,7 +375,7 @@ private fun UserInputText(
                             .align(Alignment.CenterStart)
                             .padding(start = 32.dp),
                         text = stringResource(id = R.string.message_hint),
-                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface)
                     )
                 }
             }
@@ -376,7 +385,7 @@ private fun UserInputText(
 
 @Composable
 fun EmojiSelector(
-    onTextAdded: (String) -> Unit,
+    onEmojiClicked: (String) -> Unit,
     focusRequester: FocusRequester
 ) {
     var selected by remember { mutableStateOf(EmojiStickerSelector.EMOJI) }
@@ -408,7 +417,7 @@ fun EmojiSelector(
             )
         }
         Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            EmojiTable(onTextAdded, modifier = Modifier.padding(8.dp))
+            EmojiTable(onEmojiClicked, modifier = Modifier.padding(8.dp))
         }
     }
     if (selected == EmojiStickerSelector.STICKER) {
@@ -449,35 +458,40 @@ fun ExtendedSelectorInnerButton(
 
 @Composable
 fun EmojiTable(
-    onTextAdded: (String) -> Unit,
+    onEmojiClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier.fillMaxWidth()) {
-        repeat(4) { x ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                repeat(EMOJI_COLUMNS) { y ->
-                    val emoji = emojis[x * EMOJI_COLUMNS + y]
-                    Text(
-                        modifier = Modifier
-                            .clickable(onClick = { onTextAdded(emoji) })
-                            .sizeIn(minWidth = 42.dp, minHeight = 42.dp)
-                            .padding(8.dp),
-                        text = emoji,
-                        style = LocalTextStyle.current.copy(
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    )
+    LazyRow {
+        items(emojis.size / (4 * EMOJI_COLUMNS) + min(1, emojis.size % EMOJI_COLUMNS)) { page ->
+            Column(modifier.fillMaxWidth()) {
+                repeat(4) { column ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        repeat(EMOJI_COLUMNS) { row ->
+                            val emoji = emojis[page * (4 * EMOJI_COLUMNS) + column * EMOJI_COLUMNS + row]
+                            Text(
+                                modifier = Modifier
+                                    .clickable(onClick = { onEmojiClicked(emoji) })
+                                    .sizeIn(minWidth = 42.dp, minHeight = 42.dp)
+                                    .padding(vertical = 8.dp, horizontal = 2.dp),
+                                text = emoji,
+                                style = LocalTextStyle.current.copy(
+                                    fontSize = 18.sp,
+                                    textAlign = TextAlign.Center,
+                                    fontStyle = FontStyle.Normal
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-private const val EMOJI_COLUMNS = 10
+private const val EMOJI_COLUMNS = 8
 
 private val emojis = listOf(
     "\ud83d\ude00", // Grinning Face

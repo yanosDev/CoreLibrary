@@ -49,7 +49,7 @@ internal class PaginateMessagesUseCaseImpl(
 
     override fun getMessagePageData(chatId: String): Flow<PagingData<Message>> {
         return Pager(
-            config = PagingConfig(pageSize = 20, initialLoadSize = 2),
+            config = PagingConfig(pageSize = 20, initialLoadSize = 3, enablePlaceholders = false),
             remoteMediator = MessageMediator(chatId, messageDao, messageRepository)
         ) {
             messageDao.pagingSource(chatId)

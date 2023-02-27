@@ -27,7 +27,7 @@ internal class MessageMediator(
                 LoadType.APPEND -> state.lastItemOrNull()
                 LoadType.PREPEND -> {
                     reverseOrder = true
-                    state.firstItemOrNull() ?: return MediatorResult.Success(endOfPaginationReached = false)
+                    state.firstItemOrNull() ?: return MediatorResult.Success(endOfPaginationReached = true)
                 }
             }
 
