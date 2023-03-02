@@ -34,8 +34,8 @@ android {
     packagingOptions {
         // Multiple dependency bring these files in. Exclude them to enable
         // our test APK to build (has no effect on our AARs)
-        resources.excludes += "/META-INF/AL2.0"
-        resources.excludes += "/META-INF/LGPL2.1"
+        excludes += "/META-INF/AL2.0"
+        excludes += "/META-INF/LGPL2.1"
     }
 }
 

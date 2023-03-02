@@ -67,7 +67,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
     override suspend fun userIsRegistered(email: String): Boolean {
         return withContext(dispatcher) {
             try {
-                auth.fetchSignInMethodsForEmail(email).await().signInMethods.isNullOrEmpty()
+                !auth.fetchSignInMethodsForEmail(email).await().signInMethods.isNullOrEmpty()
             } catch (e: FirebaseAuthException) {
                 Clog.e(e.localizedMessage ?: "")
                 false
