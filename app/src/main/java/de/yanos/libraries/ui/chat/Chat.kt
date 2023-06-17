@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import de.yanos.chat.data.Message
 import de.yanos.chat.domain.api.ChatApiBuilder
 import de.yanos.core.ui.view.MessageBox
@@ -53,6 +53,7 @@ fun ChatView(
                             scrollState.scrollToItem(0)
                         }
                     }
+
                     is MessageBoxEvent.SendTestMessage -> viewModel.createNewMessage(event.text, messages.itemCount)
                     is MessageBoxEvent.OnEmojiClicked -> {}
                 }
@@ -76,8 +77,8 @@ fun Messages(
         state = scrollState
     ) {
         items(
-            items = messages,
-            key = { it.id }
+            items = messages.itemSnapshotList,
+            key = { it?.id ?: "" }
         ) { message ->
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -97,6 +98,7 @@ fun Messages(
                 //TODO Error Item
                 //state.error to get error message
             }
+
             is LoadState.Loading -> { // Loading UI
                 item {
                     Column(
@@ -114,6 +116,7 @@ fun Messages(
                     }
                 }
             }
+
             else -> {}
         }
         when (val state = messages.loadState.append) { // Pagination
@@ -121,6 +124,7 @@ fun Messages(
                 //TODO Pagination Error Item
                 //state.error to get error message
             }
+
             is LoadState.Loading -> { // Pagination Loading UI
                 item {
                     Column(
@@ -134,6 +138,7 @@ fun Messages(
                     }
                 }
             }
+
             else -> {}
         }
     }
