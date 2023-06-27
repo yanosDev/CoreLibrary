@@ -7,23 +7,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInCredential
-import de.yanos.firestorewrapper.domain.AuthRepository
+import de.yanos.domain.repository.AuthenticationRepository
 import de.yanos.firestorewrapper.domain.AuthResult
 import kotlinx.coroutines.launch
 
 internal class AuthViewModel(
     clientId: String,
-    private val authRepository: AuthRepository,
+    private val authRepository: AuthenticationRepository
 ) : ViewModel() {
 
     internal val signInRequest: BeginSignInRequest
     internal val signUpRequest: BeginSignInRequest
     var userIsLoggedIn: Boolean by mutableStateOf(false)
     var userState: AuthResult by mutableStateOf(AuthResult.LoggedOut)
+    private var id: String? = null
+    private var pwd: String? = null
 
     init {
         viewModelScope.launch {
-            userIsLoggedIn = authRepository.isLoggedIn()
+            id?.let {
+                userIsLoggedIn = authRepository.getToken(it, pwd)
+            }
         }
         signUpRequest = BeginSignInRequest.Builder()
             .setGoogleIdTokenRequestOptions(
@@ -58,24 +62,30 @@ internal class AuthViewModel(
 
     fun authUserByCredentials(googleCredential: SignInCredential) {
         viewModelScope.launch {
-            val result = authRepository.loginWithCredential(googleCredential.googleIdToken)
-            setStateFromResult(result)
+            googleCredential.googleIdToken?.let { token ->
+                val result = authRepository.signInGoogle(googleCredential.id, token)
+                setStateFromResult(if (result) AuthResult.SignIn(googleCredential.id) else AuthResult.Failure(""))
+            }
+        }
+    }
+
+    fun registerUser(email: String, password: String) {
+        viewModelScope.launch {
+            val result = authRepository.registerPasswordUser(email, password)
+            setStateFromResult(if (result) AuthResult.SignIn(email) else AuthResult.Failure(""))
         }
     }
 
     fun signInUser(email: String, password: String) {
         viewModelScope.launch {
-            val result = if (authRepository.userIsRegistered(email))
-                authRepository.loginPasswordUser(email, password)
-            else
-                authRepository.createPasswordUser(email, password)
-            setStateFromResult(result)
+            val result = authRepository.signInPasswordUser(email, password)
+            setStateFromResult(if (result) AuthResult.SignIn(email) else AuthResult.Failure(""))
         }
     }
 
     fun signOutUser() {
         viewModelScope.launch {
-            authRepository.logOutUser()
+            authRepository.signOut()
             userState = AuthResult.LoggedOut
             userIsLoggedIn = false
         }
@@ -83,8 +93,8 @@ internal class AuthViewModel(
 
     fun requestPasswordReset(email: String) {
         viewModelScope.launch {
-            val result = authRepository.sendPasswordResetEmail(email)
-            setStateFromResult(result)
+            val result = authRepository.requestPasswordChangeEmail(email)
+            setStateFromResult(if (result) AuthResult.PasswordResetSent else AuthResult.Failure(""))
         }
     }
 

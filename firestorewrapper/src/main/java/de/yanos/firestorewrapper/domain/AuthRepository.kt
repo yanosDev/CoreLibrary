@@ -189,7 +189,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
 
 sealed interface AuthResult {
     object LoggedOut : AuthResult
-    class SignIn(val id: String, val email: String?, val name: String?, val provider: String?) : AuthResult
+    class SignIn(val id: String, val email: String? = null, val name: String? = null, val provider: String? = null) : AuthResult
     class Failure(error: String?) : AuthResult
     object PasswordResetSent : AuthResult
 }

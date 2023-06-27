@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.identity.SignInClient
 import de.yanos.core.ui.theme.SonayPreviews
 import de.yanos.crashlog.util.Clog
+import de.yanos.domain.client.YanosClientBuilder
+import de.yanos.domain.repository.AuthenticationRepository
+import de.yanos.domain.repository.AuthenticationRepositoryBuilder
 import de.yanos.firestorewrapper.R
 import de.yanos.firestorewrapper.domain.AuthRepositoryBuilder
 import de.yanos.firestorewrapper.domain.AuthResult
@@ -38,7 +41,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: SignInClient, onUserStateChange: (AuthResult) -> Unit) {
     val scope = rememberCoroutineScope()
-    val authViewModel = AuthViewModel(clientId, AuthRepositoryBuilder.builder().build())
+    val authViewModel = AuthViewModel(
+        clientId,
+        AuthenticationRepositoryBuilder.builder().build(YanosClientBuilder.builder().baseUrl("https://localhost:3000/").build())
+    )
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
@@ -61,6 +67,7 @@ fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: Sign
                                 .addOnFailureListener { Clog.e("Registration Failed") }
                         }
                 }
+
                 is EmailSignIn -> authViewModel.signInUser(authAction.email, authAction.password)
                 is SignOut -> authViewModel.signOutUser()
                 is PasswordReset -> authViewModel.requestPasswordReset(authAction.email)

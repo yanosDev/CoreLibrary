@@ -14,9 +14,13 @@ interface AuthenticationApi {
     @POST("auth/signIn")
     fun signIn(@Body user: UserDto): Call<String>
 
+    @POST("auth/signInGoogle")
+    fun signInGoogle(id: String, token: String): Call<String>
+
     @POST("auth/signOut")
     fun signOut(): Call<Boolean>
 
-    @GET("auth/isLoggedIn")
+    @GET("auth/getToken")
     fun getToken(@Body user: UserDto): Call<String>
+
 }
