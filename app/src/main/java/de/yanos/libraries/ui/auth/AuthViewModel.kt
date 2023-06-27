@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 internal class AuthViewModel(
     clientId: String,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     internal val signInRequest: BeginSignInRequest

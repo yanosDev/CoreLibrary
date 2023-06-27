@@ -23,7 +23,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     buildFeatures {
         compose = true
@@ -44,6 +44,7 @@ dependencies {
     implementation(project(mapOf("path" to ":core")))
     implementation(project(mapOf("path" to ":crashlog")))
     implementation(project(mapOf("path" to ":chat")))
+    implementation(project(mapOf("path" to ":domain")))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)

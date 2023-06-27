@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "de.yanos.firestorewrapper"
+    namespace = "de.yanos.domain"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -40,23 +40,21 @@ android {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":crashlog")))
     implementation(project(mapOf("path" to ":core")))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
-
-    val firebaseBom = platform(libs.firebase.bom)
-    implementation(firebaseBom)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.auth)
+    implementation(libs.okhttp3)
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit)
+    implementation(libs.moshi)
 }
 
 publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
-            artifactId = "firestorewrapper"
+            artifactId = "domain"
             version = libs.versions.yanos.lib.get()
 
             afterEvaluate {
