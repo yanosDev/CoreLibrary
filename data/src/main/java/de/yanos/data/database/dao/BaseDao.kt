@@ -1,4 +1,4 @@
-package de.yanos.core.base
+package de.yanos.data.database.dao
 
 import androidx.room.Delete
 import androidx.room.Insert

@@ -18,7 +18,7 @@ interface AuthenticationApiBuilder {
     }
 }
 
-internal class AuthenticationApiBuilderImpl() : AuthenticationApiBuilder {
+internal class AuthenticationApiBuilderImpl : AuthenticationApiBuilder {
     private var url: String? = null
     private val factories: MutableList<Converter.Factory> = mutableListOf()
     private val interceptors: MutableList<Interceptor> = mutableListOf()

@@ -4,12 +4,13 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.crashlytics)
     id(libs.plugins.kapt.get().pluginId)
     id(libs.plugins.mavenPublish.get().pluginId)
 }
 
 android {
-    namespace = "de.yanos.chat"
+    namespace = "de.yanos.data"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -25,7 +26,11 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            buildConfigField("String", "BASE_URL", "\"http://localhost:3000\"")
+        }
         getByName("release") {
+            buildConfigField("String", "BASE_URL", "http://localhost:3000")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -37,42 +42,28 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
 }
 
 dependencies {
     implementation(project(mapOf("path" to ":core")))
-    implementation(project(mapOf("path" to ":crashlog")))
-    implementation(project(mapOf("path" to ":firestorewrapper")))
-    implementation(project(mapOf("path" to ":data")))
 
+    implementation(libs.timber)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp3)
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit)
+    implementation(libs.moshi)
     implementation(libs.androidx.room.ktx)
-    implementation(project(mapOf("path" to ":data")))
-    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.paging)
-
-    implementation(libs.androidx.paging.runtime)
-    implementation(libs.androidx.paging.common)
-
-    implementation(libs.gson)
+    kapt(libs.androidx.room.compiler)
 }
-
-
 
 publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "de.yanos"
-            artifactId = "chat"
+            artifactId = "data"
             version = libs.versions.yanos.lib.get()
 
             afterEvaluate {
