@@ -12,6 +12,7 @@ import de.yanos.data.util.toQueryMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class AuthRemoteSourceImpl @Inject constructor(
@@ -20,61 +21,84 @@ internal class AuthRemoteSourceImpl @Inject constructor(
 ) : AuthRemoteSource {
     override suspend fun register(user: RegisterUserByPassword): LoadState<User> {
         return withContext(dispatcher) {
-            api.register(user).awaitResponse().let { response ->
-                response.takeIf { it.isSuccessful }?.body()?.let { user ->
-                    LoadState.Data(data = user)
-                } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+            catchException {
+                api.register(user).awaitResponse().let { response ->
+                    response.takeIf { it.isSuccessful }?.body()?.let { user ->
+                        LoadState.Data(data = user)
+                    } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+                }
             }
         }
     }
 
+
     override suspend fun signIn(user: UserSignIn): LoadState<User> {
         return withContext(dispatcher) {
-            api.signIn(user).awaitResponse().let { response ->
-                response.takeIf { it.isSuccessful }?.body()?.let { user ->
-                    LoadState.Data(data = user)
-                } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+            catchException {
+                api.signIn(user).awaitResponse().let { response ->
+                    response.takeIf { it.isSuccessful }?.body()?.let { user ->
+                        LoadState.Data(data = user)
+                    } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+                }
             }
         }
     }
 
     override suspend fun signInGoogle(user: UserSignInGoogle): LoadState<User> {
         return withContext(dispatcher) {
-            api.signInGoogle(user).awaitResponse().let { response ->
-                response.takeIf { it.isSuccessful }?.body()?.let { user ->
-                    LoadState.Data(data = user)
-                } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+            catchException {
+                api.signInGoogle(user).awaitResponse().let { response ->
+                    response.takeIf { it.isSuccessful }?.body()?.let { user ->
+                        LoadState.Data(data = user)
+                    } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+                }
             }
         }
     }
 
     override suspend fun signOut(): LoadState<Boolean> {
         return withContext(dispatcher) {
-            api.signOut().awaitResponse().let { response ->
-                response.takeIf { it.isSuccessful }?.body()?.let { hasSucceeded ->
-                    LoadState.Data(data = hasSucceeded)
-                } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+            catchException {
+                api.signOut().awaitResponse().let { response ->
+                    response.takeIf { it.isSuccessful }?.body()?.let { hasSucceeded ->
+                        LoadState.Data(data = hasSucceeded)
+                    } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+                }
             }
         }
     }
 
     override suspend fun resetPassword(user: ResetPassword): LoadState<User> {
         return withContext(dispatcher) {
-            api.resetPassword(user).awaitResponse().let { response ->
-                response.takeIf { it.isSuccessful }?.body()?.let { user ->
-                    LoadState.Data(data = user)
-                } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+            catchException {
+                api.resetPassword(user).awaitResponse().let { response ->
+                    response.takeIf { it.isSuccessful }?.body()?.let { user ->
+                        LoadState.Data(data = user)
+                    } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+                }
             }
         }
     }
 
     override suspend fun token(user: User): LoadState<String> {
         return withContext(dispatcher) {
-            api.token(toQueryMap(user)).awaitResponse().let { response ->
-                response.takeIf { it.isSuccessful }?.body()?.let { token ->
-                    LoadState.Data(data = token)
-                } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+            catchException {
+                api.token(toQueryMap(user)).awaitResponse().let { response ->
+                    response.takeIf { it.isSuccessful }?.body()?.let { token ->
+                        LoadState.Data(data = token)
+                    } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+                }
             }
+        }
+    }
+
+
+    private suspend fun <T> catchException(function: suspend (() -> LoadState<T>)): LoadState<T> {
+        return try {
+            function()
+        } catch (e: RuntimeException) {
+            Timber.e(e)
+            LoadState.Failure(Exception(e))
         }
     }
 }
