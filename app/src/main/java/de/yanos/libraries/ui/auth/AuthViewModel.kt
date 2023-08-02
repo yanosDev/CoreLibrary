@@ -7,27 +7,32 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInCredential
-import de.yanos.domain.repository.AuthenticationRepository
-import de.yanos.firestorewrapper.domain.AuthResult
+import dagger.hilt.android.lifecycle.HiltViewModel
+import de.yanos.core.utils.GoogleClientId
+import de.yanos.data.model.user.User
+import de.yanos.data.service.auth.AuthRepository
+import de.yanos.data.util.LoadState
+import de.yanos.libraries.util.prefs.AppSettings
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-internal class AuthViewModel(
-    clientId: String,
-    private val authRepository: AuthenticationRepository
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val appSettings: AppSettings,
+    private val repo: AuthRepository,
+    @GoogleClientId private val clientId: String
 ) : ViewModel() {
 
     internal val signInRequest: BeginSignInRequest
     internal val signUpRequest: BeginSignInRequest
-    var userIsLoggedIn: Boolean by mutableStateOf(false)
-    var userState: AuthResult by mutableStateOf(AuthResult.LoggedOut)
-    private var id: String? = null
-    private var pwd: String? = null
+    var userState: AuthUIState by mutableStateOf(AuthUIState.SignedOut)
 
     init {
         viewModelScope.launch {
-            id?.let {
-                userIsLoggedIn = authRepository.getToken(it, pwd)
-            }
+            val user = repo.loadUser(appSettings.userId)
+            if (user != null)
+                userState = AuthUIState.LoggedIn(user)
+
         }
         signUpRequest = BeginSignInRequest.Builder()
             .setGoogleIdTokenRequestOptions(
@@ -63,43 +68,59 @@ internal class AuthViewModel(
     fun authUserByCredentials(googleCredential: SignInCredential) {
         viewModelScope.launch {
             googleCredential.googleIdToken?.let { token ->
-                val result = authRepository.signInGoogle(googleCredential.id, token)
-                setStateFromResult(if (result) AuthResult.SignIn(googleCredential.id) else AuthResult.Failure(""))
+                val result = repo.signInGoogle(googleCredential.id, token)
+                (result as? LoadState.Data)?.data?.let { user ->
+                    userState = AuthUIState.LoggedIn(user)
+                } ?: (result as? LoadState.Failure)?.e?.let { userState = AuthUIState.AuthFailed(it) }
             }
         }
     }
 
-    fun registerUser(email: String, password: String) {
+    fun registerUser(email: String, password: String, lastName: String, firstName: String) {
         viewModelScope.launch {
-            val result = authRepository.registerPasswordUser(email, password)
-            setStateFromResult(if (result) AuthResult.SignIn(email) else AuthResult.Failure(""))
+            val result = repo.register(email, password, lastName, firstName)
+            (result as? LoadState.Data)?.data?.let { user ->
+                userState = AuthUIState.Registered(user)
+            } ?: (result as? LoadState.Failure)?.e?.let { userState = AuthUIState.AuthFailed(it) }
         }
     }
 
     fun signInUser(email: String, password: String) {
         viewModelScope.launch {
-            val result = authRepository.signInPasswordUser(email, password)
-            setStateFromResult(if (result) AuthResult.SignIn(email) else AuthResult.Failure(""))
+            val result = repo.signIn(email, password)
+            (result as? LoadState.Data)?.data?.let { user ->
+                userState = AuthUIState.LoggedIn(user)
+            } ?: (result as? LoadState.Failure)?.e?.let { userState = AuthUIState.AuthFailed(it) }
         }
     }
 
     fun signOutUser() {
         viewModelScope.launch {
-            authRepository.signOut()
-            userState = AuthResult.LoggedOut
-            userIsLoggedIn = false
+            val result = repo.signOut()
+            (result as? LoadState.Data)?.data?.let { hasSucceeded ->
+                if (hasSucceeded) {
+                    userState = AuthUIState.SignedOut
+                }
+            } ?: run { userState = AuthUIState.AuthFailed(Exception("Couldn't sign out")) }
         }
     }
 
     fun requestPasswordReset(email: String) {
         viewModelScope.launch {
-            val result = authRepository.requestPasswordChangeEmail(email)
-            setStateFromResult(if (result) AuthResult.PasswordResetSent else AuthResult.Failure(""))
+            val result = repo.resetPassword(email, "newPWD")
+            (result as? LoadState.Data)?.data?.let { user ->
+                userState = AuthUIState.PasswordRequested(user)
+            } ?: (result as? LoadState.Failure)?.e?.let {
+                userState = AuthUIState.AuthFailed(it)
+            }
         }
     }
+}
 
-    private fun setStateFromResult(result: AuthResult) {
-        userIsLoggedIn = result is AuthResult.SignIn
-        userState = result
-    }
+sealed interface AuthUIState {
+    data class Registered(val user: User) : AuthUIState
+    data class LoggedIn(val user: User) : AuthUIState
+    data class PasswordRequested(val user: User) : AuthUIState
+    data class AuthFailed(val error: Exception) : AuthUIState
+    object SignedOut : AuthUIState
 }

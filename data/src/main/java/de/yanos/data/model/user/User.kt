@@ -6,4 +6,9 @@ import com.squareup.moshi.JsonClass
 
 @Entity
 @JsonClass(generateAdapter = true)
-data class User(@PrimaryKey val id: String, private val firstName: String, private val lastName: String, val cryptPwd: String)
+data class User(
+    @PrimaryKey val id: String,
+    val firstName: String,
+    val lastName: String,
+    val cryptPwd: String
+)

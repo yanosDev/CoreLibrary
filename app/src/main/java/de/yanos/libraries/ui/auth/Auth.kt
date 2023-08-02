@@ -27,57 +27,55 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.auth.api.identity.SignInClient
 import de.yanos.core.ui.theme.SonayPreviews
-import de.yanos.crashlog.util.Clog
-import de.yanos.domain.client.YanosClientBuilder
-import de.yanos.domain.repository.AuthenticationRepository
-import de.yanos.domain.repository.AuthenticationRepositoryBuilder
-import de.yanos.firestorewrapper.R
-import de.yanos.firestorewrapper.domain.AuthRepositoryBuilder
-import de.yanos.firestorewrapper.domain.AuthResult
+import de.yanos.data.service.auth.AuthRepository
+import de.yanos.core.R
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
-fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: SignInClient, onUserStateChange: (AuthResult) -> Unit) {
+fun AuthView(
+    modifier: Modifier = Modifier,
+    vm: AuthViewModel = hiltViewModel(),
+    oneTapClient: SignInClient,
+    onUserStateChange: (AuthUIState) -> Unit
+) {
     val scope = rememberCoroutineScope()
-    val authViewModel = AuthViewModel(
-        clientId,
-        AuthenticationRepositoryBuilder.builder().build(YanosClientBuilder.builder().baseUrl("https://localhost:3000/").build())
-    )
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
+            vm.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
         }
     }
-    onUserStateChange(authViewModel.userState)
+    onUserStateChange(vm.userState)
     val authExecutor = { authAction: AuthAction ->
         scope.launch {
             when (authAction) {
                 is GoogleSignIn -> {
-                    oneTapClient.beginSignIn(authViewModel.signInRequest)
+                    oneTapClient.beginSignIn(vm.signInRequest)
                         .addOnSuccessListener { result ->
                             launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
                         }
                         .addOnFailureListener {
-                            oneTapClient.beginSignIn(authViewModel.signUpRequest)
+                            oneTapClient.beginSignIn(vm.signUpRequest)
                                 .addOnSuccessListener { result ->
                                     launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
                                 }
-                                .addOnFailureListener { Clog.e("Registration Failed") }
+                                .addOnFailureListener { Timber.e("Registration Failed") }
                         }
                 }
 
-                is EmailSignIn -> authViewModel.signInUser(authAction.email, authAction.password)
-                is SignOut -> authViewModel.signOutUser()
-                is PasswordReset -> authViewModel.requestPasswordReset(authAction.email)
+                is EmailSignIn -> vm.signInUser(authAction.email, authAction.password)
+                is SignOut -> vm.signOutUser()
+                is PasswordReset -> vm.requestPasswordReset(authAction.email)
             }
         }
         Unit
     }
     AuthScreen(
         modifier = modifier,
-        isUserLoggedIn = authViewModel.userIsLoggedIn,
+        uiState = vm.userState,
         authExecutor,
     )
 }
@@ -87,12 +85,13 @@ fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: Sign
 @Composable
 private fun AuthScreen(
     modifier: Modifier = Modifier,
-    isUserLoggedIn: Boolean = true,
+    uiState: AuthUIState = AuthUIState.SignedOut,
     authExecutor: (AuthAction) -> Unit = { _ -> },
 ) {
-    if (!isUserLoggedIn)
-        SignInScreen(modifier = modifier, authExecutor = authExecutor)
-    else SignOffScreen(modifier = modifier, authExecutor = authExecutor)
+    when (uiState) {
+        AuthUIState.SignedOut -> SignInScreen(modifier = modifier, authExecutor = authExecutor)
+        else -> SignOffScreen(modifier = modifier, authExecutor = authExecutor)
+    }
 }
 
 @Composable

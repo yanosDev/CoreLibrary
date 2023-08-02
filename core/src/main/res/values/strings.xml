@@ -7,4 +7,14 @@
     <string name="message_send">Send</string>
     <string name="emojis_label">Emojis</string>
     <string name="stickers_label">Stickers</string>
+
+    <string name="btn_login_google">Sign in with Google</string>
+    <string name="btn_logout">Sign Out</string>
+    <string name="welcome">Welcome Back</string>
+    <string name="signIn_to_continue">Sign in to continue</string>
+    <string name="signIn_alternative">Or, sign in with:</string>
+    <string name="name">Username</string>
+    <string name="password">Password</string>
+    <string name="signIn">Sign In Now</string>
+    <string name="forgot_password">Forgot password?</string>
 </resources>

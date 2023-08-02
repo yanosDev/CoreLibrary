@@ -8,18 +8,19 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.auth.api.identity.Identity
+import dagger.hilt.android.AndroidEntryPoint
 import de.yanos.core.ui.theme.AppTheme
 import de.yanos.core.ui.view.DynamicNavigationScreen
 import de.yanos.core.utils.NavigationDestination
 import de.yanos.libraries.ui.auth.AuthView
 import de.yanos.libraries.ui.chat.ChatView
 
+@AndroidEntryPoint
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +72,6 @@ private fun TestNavHost(
         }
         composable(TestRoutes.LOGIN) {
             AuthView(
-                clientId = stringResource(id = R.string.default_web_client_id),
                 oneTapClient = Identity.getSignInClient(activity),
                 onUserStateChange = {})
         }

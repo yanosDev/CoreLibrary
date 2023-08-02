@@ -1,5 +1,6 @@
 package de.yanos.data.service.auth
 
+import de.yanos.core.utils.IODispatcher
 import de.yanos.data.model.user.RegisterUserByPassword
 import de.yanos.data.model.user.ResetPassword
 import de.yanos.data.model.user.User
@@ -8,12 +9,17 @@ import de.yanos.data.model.user.UserSignInGoogle
 import de.yanos.data.util.LoadState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-internal class AuthRepositoryImpl(
+internal class AuthRepositoryImpl @Inject constructor(
     private val local: AuthLocalSource,
     private val remote: AuthRemoteSource,
-    private val dispatcher: CoroutineDispatcher
+    @IODispatcher private val dispatcher: CoroutineDispatcher
 ) : AuthRepository {
+    override suspend fun loadUser(id: String): User? {
+        return local.loadUser(id)
+    }
+
     override suspend fun register(email: String, pwd: String, lastName: String, firstName: String): LoadState<User> {
         return withContext(dispatcher) {
             val result = remote.register(RegisterUserByPassword(email = email, pwd = pwd, lastName = lastName, firstName = firstName))
@@ -59,6 +65,8 @@ internal class AuthRepositoryImpl(
     }
 
     override suspend fun token(id: String): LoadState<String> {
-        return withContext(dispatcher) { remote.token(local.loadUser(id)) }
+        return withContext(dispatcher) {
+            remote.token(local.loadUser(id) ?: return@withContext LoadState.Failure(Exception("No User found")))
+        }
     }
 }

@@ -1,21 +1,10 @@
-package de.yanos.crashlog.util
+package de.yanos.libraries.util.prefs
 
 import android.util.Log
-import com.google.firebase.crashlytics.BuildConfig
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 
-object Clog {
-    private val crashlytics = FirebaseCrashlytics.getInstance()
-    fun plant() {
-        Timber.plant(if (BuildConfig.DEBUG) Timber.DebugTree() else ReleaseTree(crashlytics))
-    }
-
-    fun e(msg: String) = Timber.e(msg)
-    fun d(msg: String) = Timber.d(msg)
-}
-
-internal class ReleaseTree(private val crashlytics: FirebaseCrashlytics = FirebaseCrashlytics.getInstance()) : Timber.Tree() {
+class ReleaseTree(private val crashlytics: FirebaseCrashlytics = FirebaseCrashlytics.getInstance()) : Timber.Tree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         if (priority == Log.ERROR) {
             crashlytics.log(message)

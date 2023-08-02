@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.crashlytics)
     id(libs.plugins.kapt.get().pluginId)
+    id(libs.plugins.hilt.get().pluginId)
     id(libs.plugins.mavenPublish.get().pluginId)
 }
 
@@ -47,16 +48,26 @@ android {
 dependencies {
     implementation(project(mapOf("path" to ":core")))
 
-    implementation(libs.timber)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
+
+    //Server
     implementation(libs.okhttp3)
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit)
     implementation(libs.moshi)
+
+    //Database
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
+
+    //Logger
+    implementation(libs.timber)
+
+    //DI
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 }
 
 publishing {

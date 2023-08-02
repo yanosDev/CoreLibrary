@@ -47,18 +47,16 @@ android {
 
 dependencies {
     implementation(project(mapOf("path" to ":core")))
-    implementation(project(mapOf("path" to ":crashlog")))
-    implementation(project(mapOf("path" to ":firestorewrapper")))
     implementation(project(mapOf("path" to ":data")))
+    implementation(project(mapOf("path" to ":firestorewrapper")))
 
-    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.ktx)
 
     implementation(libs.androidx.room.ktx)
-    implementation(project(mapOf("path" to ":data")))
-    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.paging)
+    kapt(libs.androidx.room.compiler)
 
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.common)

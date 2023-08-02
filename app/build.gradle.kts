@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.crashlytics)
     id(libs.plugins.googleServices.get().pluginId)
+    id(libs.plugins.kapt.get().pluginId)
+    id(libs.plugins.hilt.get().pluginId)
 }
 android {
     namespace = "de.yanos.libraries"
@@ -40,30 +42,41 @@ android {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":firestorewrapper")))
     implementation(project(mapOf("path" to ":core")))
-    implementation(project(mapOf("path" to ":crashlog")))
     implementation(project(mapOf("path" to ":chat")))
-    implementation(project(mapOf("path" to ":domain")))
+    implementation(project(mapOf("path" to ":firestorewrapper")))
+    implementation(project(mapOf("path" to ":data")))
 
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.navigation.compose)
-
+    //Compose
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
-    androidTestImplementation(composeBom)
-
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.materialWindow)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    androidTestImplementation(composeBom)
 
+    //Paging
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.common)
     implementation(libs.androidx.paging.compose)
 
+    //Google Auth
     implementation(libs.google.auth)
     implementation(libs.google.services)
+
+    //Logging
+    val firebaseBom = platform(libs.firebase.bom)
+    implementation(firebaseBom)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.timber)
+
+    //DI
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.compose)
+    kapt(libs.hilt.compiler)
 }

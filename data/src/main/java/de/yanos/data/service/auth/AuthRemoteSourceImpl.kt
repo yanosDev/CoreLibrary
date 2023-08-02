@@ -1,5 +1,6 @@
 package de.yanos.data.service.auth
 
+import de.yanos.core.utils.IODispatcher
 import de.yanos.data.api.AuthApi
 import de.yanos.data.model.user.RegisterUserByPassword
 import de.yanos.data.model.user.ResetPassword
@@ -11,10 +12,11 @@ import de.yanos.data.util.toQueryMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
+import javax.inject.Inject
 
-internal class AuthRemoteSourceImpl(
+internal class AuthRemoteSourceImpl @Inject constructor(
     private val api: AuthApi,
-    private val dispatcher: CoroutineDispatcher
+    @IODispatcher private val dispatcher: CoroutineDispatcher
 ) : AuthRemoteSource {
     override suspend fun register(user: RegisterUserByPassword): LoadState<User> {
         return withContext(dispatcher) {
