@@ -9,7 +9,7 @@ import de.yanos.data.model.user.User
 
 @Database(
     entities = [User::class],
-    version = 0
+    version = 1
 )
 internal abstract class LibDatabaseImpl : RoomDatabase(), LibDatabase {
     abstract override fun userDao(): UserDao

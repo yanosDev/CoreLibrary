@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AppModule {
+class AppModule {
     @Provides
     fun provideCrashlytics(): FirebaseCrashlytics {
         return FirebaseCrashlytics.getInstance()

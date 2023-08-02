@@ -36,7 +36,7 @@ class TestActivity : ComponentActivity() {
                     //NavHost Here
                     TestNavHost(
                         modifier = contentModifier,
-                        startRoute = TestRoutes.THREE,
+                        startRoute = TestRoutes.LOGIN,
                         navController = navController,
                         this@TestActivity
                     )
