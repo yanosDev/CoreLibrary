@@ -71,9 +71,7 @@ private fun TestNavHost(
             Text(text = TestRoutes.FOUR)
         }
         composable(TestRoutes.LOGIN) {
-            AuthView(
-                oneTapClient = Identity.getSignInClient(activity),
-                onUserStateChange = {})
+            AuthView(onUserStateChange = {})
         }
     }
 }

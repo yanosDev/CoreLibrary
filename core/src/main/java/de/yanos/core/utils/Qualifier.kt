@@ -21,3 +21,10 @@ annotation class DebugInterceptor
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class GoogleClientId
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class SignInRequest
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class SignUpRequest

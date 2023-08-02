@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">YanosLibraries</string>
+    <!-- General purposed -->
+    <string name="app_email">Email</string>
+    <string name="app_failure">Failure</string>
+    <string name="app_first_name">First name</string>
+    <string name="app_last_name">Last name</string>
+    <string name="app_password">Password</string>
+    <string name="app_google_login">Sign in with Google</string>
+
+    <!-- Registration -->
+    <string name="register_account">Create an Account</string>
+    <string name="register_new_user">Start Registration</string>
+    <string name="register_email">@string/app_email</string>
+    <string name="register_error_title">@string/app_failure</string>
+    <string name="register_error_text">Registration has failed. Please try it again.</string>
+    <string name="register_error_close">Close</string>
+    <string name="register_first_name">@string/app_first_name</string>
+    <string name="register_google">@string/app_google_login</string>
+    <string name="register_intro">Welcome to my Library</string>
+    <string name="register_last_name">@string/app_last_name</string>
+    <string name="register_password">@string/app_password</string>
+    <string name="register_or">Or</string>
 
     <string name="fab_add_note">Add</string>
     <string name="message_hint">Your Message here</string>

@@ -23,65 +23,18 @@ class AuthViewModel @Inject constructor(
     @GoogleClientId private val clientId: String
 ) : ViewModel() {
 
-    internal val signInRequest: BeginSignInRequest
-    internal val signUpRequest: BeginSignInRequest
-    var userState: AuthUIState by mutableStateOf(AuthUIState.SignedOut)
+    var userState: AuthUIState by mutableStateOf(AuthUIState.Register)
 
     init {
+        checkUserAuthState()
+    }
+
+    fun checkUserAuthState() {
         viewModelScope.launch {
             val user = repo.loadUser(appSettings.userId)
             if (user != null)
                 userState = AuthUIState.LoggedIn(user)
 
-        }
-        signUpRequest = BeginSignInRequest.Builder()
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
-                    .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
-                    .setServerClientId(clientId)
-                    // Show all accounts on the device.
-                    .setFilterByAuthorizedAccounts(false)
-                    .build()
-            )
-            .build()
-        signInRequest = BeginSignInRequest.Builder()
-            .setPasswordRequestOptions(
-                BeginSignInRequest.PasswordRequestOptions.Builder()
-                    .setSupported(true)
-                    .build()
-            )
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
-                    .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
-                    .setServerClientId(clientId)
-                    // Only show accounts previously used to sign in.
-                    .setFilterByAuthorizedAccounts(true)
-                    .build()
-            )
-            // Automatically sign in when exactly one credential is retrieved.
-            .setAutoSelectEnabled(true)
-            .build()
-    }
-
-    fun authUserByCredentials(googleCredential: SignInCredential) {
-        viewModelScope.launch {
-            googleCredential.googleIdToken?.let { token ->
-                val result = repo.signInGoogle(googleCredential.id, token)
-                (result as? LoadState.Data)?.data?.let { user ->
-                    userState = AuthUIState.LoggedIn(user)
-                } ?: (result as? LoadState.Failure)?.e?.let { userState = AuthUIState.AuthFailed(it) }
-            }
-        }
-    }
-
-    fun registerUser(email: String, password: String, lastName: String, firstName: String) {
-        viewModelScope.launch {
-            val result = repo.register(email, password, lastName, firstName)
-            (result as? LoadState.Data)?.data?.let { user ->
-                userState = AuthUIState.Registered(user)
-            } ?: (result as? LoadState.Failure)?.e?.let { userState = AuthUIState.AuthFailed(it) }
         }
     }
 
@@ -118,6 +71,10 @@ class AuthViewModel @Inject constructor(
 }
 
 sealed interface AuthUIState {
+    object Profile : AuthUIState
+    object Login : AuthUIState
+    object Register : AuthUIState
+    object Password : AuthUIState
     data class Registered(val user: User) : AuthUIState
     data class LoggedIn(val user: User) : AuthUIState
     data class PasswordRequested(val user: User) : AuthUIState

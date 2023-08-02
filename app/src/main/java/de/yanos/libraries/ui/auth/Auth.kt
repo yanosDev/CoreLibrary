@@ -30,8 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.auth.api.identity.SignInClient
 import de.yanos.core.ui.theme.SonayPreviews
-import de.yanos.data.service.auth.AuthRepository
 import de.yanos.core.R
+import de.yanos.core.ui.view.DividerText
+import de.yanos.core.ui.view.EmailInput
+import de.yanos.core.ui.view.FilledInput
+import de.yanos.core.ui.view.LabelMedium
+import de.yanos.core.ui.view.NameInput
+import de.yanos.core.ui.view.PasswordInput
+import de.yanos.libraries.ui.auth.registration.RegisterScreen
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -39,31 +45,15 @@ import timber.log.Timber
 fun AuthView(
     modifier: Modifier = Modifier,
     vm: AuthViewModel = hiltViewModel(),
-    oneTapClient: SignInClient,
     onUserStateChange: (AuthUIState) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            vm.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
-        }
-    }
     onUserStateChange(vm.userState)
     val authExecutor = { authAction: AuthAction ->
         scope.launch {
             when (authAction) {
                 is GoogleSignIn -> {
-                    oneTapClient.beginSignIn(vm.signInRequest)
-                        .addOnSuccessListener { result ->
-                            launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
-                        }
-                        .addOnFailureListener {
-                            oneTapClient.beginSignIn(vm.signUpRequest)
-                                .addOnSuccessListener { result ->
-                                    launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
-                                }
-                                .addOnFailureListener { Timber.e("Registration Failed") }
-                        }
+
                 }
 
                 is EmailSignIn -> vm.signInUser(authAction.email, authAction.password)
@@ -73,26 +63,15 @@ fun AuthView(
         }
         Unit
     }
-    AuthScreen(
-        modifier = modifier,
-        uiState = vm.userState,
-        authExecutor,
-    )
-}
+    when (vm.userState) {
+        AuthUIState.Register -> RegisterScreen(modifier = modifier, onUserRegistered = {
+            vm.checkUserAuthState()
+        })
 
-@SonayPreviews
-@Preview
-@Composable
-private fun AuthScreen(
-    modifier: Modifier = Modifier,
-    uiState: AuthUIState = AuthUIState.SignedOut,
-    authExecutor: (AuthAction) -> Unit = { _ -> },
-) {
-    when (uiState) {
-        AuthUIState.SignedOut -> SignInScreen(modifier = modifier, authExecutor = authExecutor)
         else -> SignOffScreen(modifier = modifier, authExecutor = authExecutor)
     }
 }
+
 
 @Composable
 private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthAction) -> Unit) {

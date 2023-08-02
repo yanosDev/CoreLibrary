@@ -1,6 +1,8 @@
 package de.yanos.data.di
 
 import android.content.Context
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,15 +22,15 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import javax.inject.Singleton
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal class CoreModule {
+internal class DataModule {
 
     @Provides
     @DebugInterceptor
-    fun provideDebugInterceptor():Interceptor{
+    fun provideDebugInterceptor(): Interceptor {
         return HttpLoggingInterceptor()
     }
 
@@ -43,8 +45,12 @@ internal class CoreModule {
 
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
         return Retrofit.Builder()
             .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .baseUrl(BuildConfig.BASE_URL)
             .build()
     }
@@ -55,21 +61,23 @@ internal class CoreModule {
     }
 
     @Provides
-    fun provideDB(@ApplicationContext context:Context):LibDatabase{
-      return  LibDatabaseImpl.db(context)
+    fun provideDB(@ApplicationContext context: Context): LibDatabase {
+        return LibDatabaseImpl.db(context)
     }
 
     @Provides
-    fun provideUserDao(db:LibDatabase):UserDao{
+    fun provideUserDao(db: LibDatabase): UserDao {
         return db.userDao()
     }
 
     @Provides
     @IODispatcher
     fun provideIODispatcher() = Dispatchers.IO
+
     @Provides
     @MainDispatcher
     fun provideMainDispatcher() = Dispatchers.Main
+
     @Provides
     @DefaultDispatcher
     fun provideDefaultDispatcher() = Dispatchers.Default

@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit)
     implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
 
     //Database
     implementation(libs.androidx.room.ktx)
