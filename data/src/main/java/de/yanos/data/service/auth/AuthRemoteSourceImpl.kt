@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
 import timber.log.Timber
+import java.io.IOException
 import javax.inject.Inject
 
 internal class AuthRemoteSourceImpl @Inject constructor(
@@ -25,7 +26,7 @@ internal class AuthRemoteSourceImpl @Inject constructor(
                 api.register(user).awaitResponse().let { response ->
                     response.takeIf { it.isSuccessful }?.body()?.let { user ->
                         LoadState.Data(data = user)
-                    } ?: LoadState.Failure(Exception(response.errorBody().toString()))
+                    } ?: LoadState.Failure(Exception("${response.code()} - ${response.message()}"))
                 }
             }
         }
@@ -96,7 +97,7 @@ internal class AuthRemoteSourceImpl @Inject constructor(
     private suspend fun <T> catchException(function: suspend (() -> LoadState<T>)): LoadState<T> {
         return try {
             function()
-        } catch (e: RuntimeException) {
+        } catch (e: IOException) {
             Timber.e(e)
             LoadState.Failure(Exception(e))
         }

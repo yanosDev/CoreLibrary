@@ -3,6 +3,9 @@
     <string name="app_name">YanosLibraries</string>
     <!-- General purposed -->
     <string name="app_email">Email</string>
+    <string name="app_error_email">This is not a valid mail.</string>
+    <string name="app_error_name">Name is invalid.</string>
+    <string name="app_error_pwd">Password has to be at least 8 characters.</string>
     <string name="app_failure">Failure</string>
     <string name="app_first_name">First name</string>
     <string name="app_last_name">Last name</string>
@@ -13,8 +16,10 @@
     <string name="register_account">Create an Account</string>
     <string name="register_new_user">Start Registration</string>
     <string name="register_email">@string/app_email</string>
-    <string name="register_error_title">@string/app_failure</string>
-    <string name="register_error_text">Registration has failed. Please try it again.</string>
+    <string name="register_error_server_title">@string/app_failure</string>
+    <string name="register_error_invalid_title">Invalid Data</string>
+    <string name="register_error_server_text">Registration has failed. Please try it again.</string>
+    <string name="register_error_invalid_text">Please check your data. Some of them are invalid.</string>
     <string name="register_error_close">Close</string>
     <string name="register_first_name">@string/app_first_name</string>
     <string name="register_google">@string/app_google_login</string>

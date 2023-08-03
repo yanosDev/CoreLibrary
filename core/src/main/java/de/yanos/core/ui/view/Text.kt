@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import de.yanos.core.R
 import de.yanos.core.utils.isCity
 import de.yanos.core.utils.isCountry
 import de.yanos.core.utils.isEmail
@@ -92,6 +93,7 @@ fun NameInput(
     colors: TextFieldColors = TextFieldDefaults.colors()
 ) {
     val inputText by remember(value) { mutableStateOf(value) }
+    val hasError = inputText.text.isNotBlank() && !inputText.text.isName()
     FilledInput(
         inputText,
         onValueChange,
@@ -105,8 +107,12 @@ fun NameInput(
         trailingIcon,
         prefix,
         suffix,
-        supportingText,
-        inputText.text.isName(),
+        supportingText ?: {
+            if (hasError) {
+                LabelSmall(text = stringResource(id = R.string.app_error_name))
+            }
+        },
+        hasError,
         visualTransformation,
         keyboardOptions,
         keyboardActions,
@@ -206,6 +212,7 @@ fun EmailInput(
     colors: TextFieldColors = TextFieldDefaults.colors()
 ) {
     val inputText by remember(value) { mutableStateOf(value) }
+    val hasError = inputText.text.isNotBlank() && !inputText.text.isEmail()
     FilledInput(
         inputText,
         onValueChange,
@@ -219,8 +226,12 @@ fun EmailInput(
         trailingIcon,
         prefix,
         suffix,
-        supportingText,
-        inputText.text.isEmail(),
+        supportingText ?: {
+            if (hasError) {
+                LabelSmall(text = stringResource(id = R.string.app_error_email))
+            }
+        },
+        hasError,
         visualTransformation,
         keyboardOptions,
         keyboardActions,
@@ -267,6 +278,7 @@ fun PasswordInput(
     var transformation by remember {
         mutableStateOf(visualTransformation)
     }
+    val hasError = inputText.text.isNotBlank() && !inputText.text.isPassword()
     FilledInput(
         inputText,
         onValueChange,
@@ -295,8 +307,12 @@ fun PasswordInput(
         },
         prefix,
         suffix,
-        supportingText,
-        inputText.text.isPassword(),
+        supportingText ?: {
+            if (hasError) {
+                LabelSmall(text = stringResource(id = R.string.app_error_pwd))
+            }
+        },
+        hasError,
         transformation,
         keyboardOptions,
         keyboardActions,

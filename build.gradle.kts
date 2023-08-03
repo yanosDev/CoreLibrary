@@ -6,6 +6,7 @@ buildscript {
         if (!libs.versions.compose.snapshot.get().endsWith("SNAPSHOT")) {
             maven { url = uri("https://androidx.dev/snapshots/builds/${libs.versions.compose.snapshot.get()}/artifacts/repository/") }
         }
+        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
     }
     dependencies {
         classpath(libs.android.gradlePlugin)

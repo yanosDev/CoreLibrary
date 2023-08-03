@@ -6,9 +6,9 @@ import de.yanos.core.utils.PreferenceItem
 import javax.inject.Inject
 
 interface AppSettings {
-    val userId: String
+    var userId: String
 }
 
 class AppSettingsImpl @Inject constructor(@ApplicationContext context: Context) : AppSettings {
-    override val userId: String by PreferenceItem(context) { "" }
+    override var userId: String by PreferenceItem(context) { "" }
 }

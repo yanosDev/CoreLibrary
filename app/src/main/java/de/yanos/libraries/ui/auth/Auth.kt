@@ -2,10 +2,6 @@
 
 package de.yanos.libraries.ui.auth
 
-import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,21 +21,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.auth.api.identity.SignInClient
-import de.yanos.core.ui.theme.SonayPreviews
 import de.yanos.core.R
-import de.yanos.core.ui.view.DividerText
-import de.yanos.core.ui.view.EmailInput
-import de.yanos.core.ui.view.FilledInput
-import de.yanos.core.ui.view.LabelMedium
-import de.yanos.core.ui.view.NameInput
-import de.yanos.core.ui.view.PasswordInput
 import de.yanos.libraries.ui.auth.registration.RegisterScreen
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @Composable
 fun AuthView(
@@ -64,9 +50,15 @@ fun AuthView(
         Unit
     }
     when (vm.userState) {
-        AuthUIState.Register -> RegisterScreen(modifier = modifier, onUserRegistered = {
-            vm.checkUserAuthState()
-        })
+        AuthUIState.Register -> RegisterScreen(
+            modifier = modifier,
+            continueAfterRegistration = {
+                vm.checkUserAuthState()
+            },
+            user = vm.user,
+            onUserChanged = { vm.user = it },
+            startLogin = { vm.userState = AuthUIState.Login }
+        )
 
         else -> SignOffScreen(modifier = modifier, authExecutor = authExecutor)
     }
