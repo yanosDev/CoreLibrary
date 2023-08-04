@@ -27,6 +27,8 @@
     <string name="register_last_name">@string/app_last_name</string>
     <string name="register_password">@string/app_password</string>
     <string name="register_or">Or</string>
+    <string name="register_sign_in">Sign In</string>
+    <string name="register_to_login_desc">Already registered? Sign in here: </string>
 
     <string name="fab_add_note">Add</string>
     <string name="message_hint">Your Message here</string>

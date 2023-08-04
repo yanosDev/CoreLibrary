@@ -8,12 +8,14 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.yanos.core.utils.GoogleClientId
 import de.yanos.core.utils.SignInRequest
 import de.yanos.core.utils.SignUpRequest
+import de.yanos.core.utils.isEmail
+import de.yanos.core.utils.isName
+import de.yanos.core.utils.isPassword
 import de.yanos.data.service.auth.AuthRepository
 import de.yanos.data.util.LoadState
-import de.yanos.libraries.ui.auth.AuthUIState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,14 +25,25 @@ class RegistrationViewModel @Inject constructor(
     @SignInRequest val signIn: BeginSignInRequest,
     @SignUpRequest val signUp: BeginSignInRequest,
 ) : ViewModel() {
-    var isRegistrationDone: Boolean by mutableStateOf(false)
-        private set
-    var error: String? by mutableStateOf(null)
+    var state by mutableStateOf<RegistrationState>(RegistrationState.Idle)
 
-    fun registerUser(email: String, password: String, lastName: String, firstName: String) {
+    fun startRegisteringUser(email: String, password: String, lastName: String, firstName: String) {
         viewModelScope.launch {
-            val result = repo.register(email, password, lastName, firstName)
-            setResult(result)
+            if (email.isEmail()
+                && password.isPassword()
+                && firstName.isName()
+                && lastName.isName()
+            ) {
+                state = RegistrationState.RegistrationInProgress
+                val ts = System.currentTimeMillis()
+                val result = repo.register(email, password, lastName, firstName)
+                val diff = System.currentTimeMillis() - ts
+                if (diff < 3000)
+                    delay(diff)
+                setResult(result)
+            } else {
+                state = RegistrationState.DataCheckFailed
+            }
         }
     }
 
@@ -44,7 +57,16 @@ class RegistrationViewModel @Inject constructor(
     }
 
     private fun <T> setResult(result: LoadState<T>) {
-        isRegistrationDone = (result as? LoadState.Data)?.data != null
-        (result as? LoadState.Failure)?.e?.let { error = it.message }
+        state =
+            if ((result as? LoadState.Data)?.data != null) RegistrationState.RegistrationSuccessfull else RegistrationState.RegistrationFailed((result as? LoadState.Failure)?.e)
     }
+}
+
+sealed interface RegistrationState {
+    object Idle : RegistrationState
+    object RegistrationInProgress : RegistrationState
+    object RegistrationSuccessfull : RegistrationState
+    class RegistrationFailed(val e: Exception?) : RegistrationState
+    object DataCheckFailed : RegistrationState
+
 }

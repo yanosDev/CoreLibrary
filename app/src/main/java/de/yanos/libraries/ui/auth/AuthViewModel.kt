@@ -54,7 +54,7 @@ class AuthViewModel @Inject constructor(
                 if (hasSucceeded) {
                     appSettings.userId = ""
                     user = User("", "", "", "")
-                    userState = AuthUIState.SignedOut
+                    userState = AuthUIState.Register
                 }
             } ?: run { userState = AuthUIState.AuthFailed(Exception("Couldn't sign out")) }
         }

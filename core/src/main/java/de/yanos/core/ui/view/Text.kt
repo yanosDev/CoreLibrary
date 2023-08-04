@@ -109,7 +109,7 @@ fun NameInput(
         suffix,
         supportingText ?: {
             if (hasError) {
-                LabelSmall(text = stringResource(id = R.string.app_error_name))
+                LabelSmall(text = R.string.app_error_name)
             }
         },
         hasError,
@@ -228,7 +228,7 @@ fun EmailInput(
         suffix,
         supportingText ?: {
             if (hasError) {
-                LabelSmall(text = stringResource(id = R.string.app_error_email))
+                LabelSmall(text = R.string.app_error_email)
             }
         },
         hasError,
@@ -309,7 +309,7 @@ fun PasswordInput(
         suffix,
         supportingText ?: {
             if (hasError) {
-                LabelSmall(text = stringResource(id = R.string.app_error_pwd))
+                LabelSmall(text = R.string.app_error_pwd)
             }
         },
         hasError,
@@ -665,7 +665,7 @@ fun FilledInput(
 
 @Composable
 fun LabelSmall(
-    text: String,
+    text: Int,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -684,7 +684,7 @@ fun LabelSmall(
     style: TextStyle = MaterialTheme.typography.labelSmall
 ) {
     Text(
-        text,
+        stringResource(id = text),
         modifier,
         color,
         fontSize,
@@ -747,7 +747,7 @@ fun LabelMedium(
 
 @Composable
 fun LabelLarge(
-    text: String,
+    text: Int,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -766,7 +766,7 @@ fun LabelLarge(
     style: TextStyle = MaterialTheme.typography.labelLarge
 ) {
     Text(
-        text,
+        stringResource(id = text),
         modifier,
         color,
         fontSize,
