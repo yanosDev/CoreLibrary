@@ -46,6 +46,7 @@ fun AuthView(
                 is SignOut -> {
                     vm.signOutUser()
                 }
+
                 is PasswordReset -> vm.requestPasswordReset(authAction.email)
             }
         }

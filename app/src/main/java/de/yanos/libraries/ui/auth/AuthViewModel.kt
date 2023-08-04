@@ -1,5 +1,6 @@
 package de.yanos.libraries.ui.auth
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,7 +22,7 @@ class AuthViewModel @Inject constructor(
     @GoogleClientId private val clientId: String
 ) : ViewModel() {
 
-    var user: User by mutableStateOf(User("", "", "", ""))
+    var user by mutableStateOf(User("", "", "", ""))
     var userState: AuthUIState by mutableStateOf(AuthUIState.Register)
 
     init {

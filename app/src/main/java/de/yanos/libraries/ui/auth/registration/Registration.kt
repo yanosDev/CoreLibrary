@@ -5,25 +5,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AppRegistration
 import androidx.compose.material.icons.rounded.Login
@@ -46,7 +38,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -105,42 +96,35 @@ internal fun RegisterScreen(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(vertical = 32.dp)
+        modifier = Modifier
+            .padding(top = 16.dp, start = 24.dp, end = 24.dp)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = modifier
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row {
+            RegistrationHeader(modifier = Modifier.wrapContentWidth())
+            RegistrationBackground(modifier = Modifier.height(72.dp))
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        AnimatedVisibility(
+            visible = vm.state == RegistrationState.RegistrationInProgress,
+            enter = fadeIn(),
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp, vertical = 32.dp)
-            ) {
-                RegistrationHeader(modifier = Modifier.wrapContentWidth())
-                RegistrationBackground(modifier = Modifier.height(72.dp))
-            }
-            AnimatedVisibility(
-                visible = vm.state == RegistrationState.RegistrationInProgress,
-                enter = fadeIn(),
-            ) {
-                RegistrationProgressing()
-            }
-            AnimatedVisibility(
-                visible = vm.state != RegistrationState.RegistrationInProgress,
-                enter = fadeIn(),
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    RegistrationPassword(vm = vm, user = user)
-                    RegistrationSocial(vm = vm)
-                }
+            RegistrationProgressing()
+        }
+        AnimatedVisibility(
+            visible = vm.state != RegistrationState.RegistrationInProgress,
+            enter = fadeIn(),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                RegistrationPassword(vm = vm, user = user, onUserChanged = onUserChanged)
+                RegistrationSocial(vm = vm)
+                RegistrationToLogin(
+                    modifier = Modifier.fillMaxWidth(),
+                    startLogin = startLogin
+                )
             }
         }
-        RegistrationToLogin(startLogin = startLogin)
     }
 }
 
@@ -162,45 +146,46 @@ private fun RegistrationPassword(
     user: User,
     onUserChanged: (User) -> Unit = {},
 ) {
-    var firstName by remember { mutableStateOf(TextFieldValue(user.firstName)) }
-    var lastName by remember { mutableStateOf(TextFieldValue(user.firstName)) }
-    var id by remember { mutableStateOf(TextFieldValue(user.firstName)) }
-    var password by remember { mutableStateOf(TextFieldValue(user.firstName)) }
+    var email by remember { mutableStateOf(TextFieldValue(user.id)) }
+    var first by remember { mutableStateOf(TextFieldValue(user.firstName)) }
+    var last by remember { mutableStateOf(TextFieldValue(user.lastName)) }
+    var pwd by remember { mutableStateOf(TextFieldValue(user.password)) }
+
     Column(
         modifier = modifier.padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         NameInput(
             label = { LabelMedium(R.string.register_first_name) },
-            value = firstName,
+            value = first,
             onValueChange = {
-                firstName = it
+                first = it
                 onUserChanged(user.copy(firstName = it.text))
             })
         Spacer(modifier = Modifier.height(8.dp))
         NameInput(
             label = { LabelMedium(R.string.register_last_name) },
-            value = lastName,
+            value = last,
             onValueChange = {
-                lastName = it
+                last = it
                 onUserChanged(user.copy(lastName = it.text))
             }
         )
         Spacer(modifier = Modifier.height(8.dp))
         EmailInput(
             label = { LabelMedium(R.string.register_email) },
-            value = id,
+            value = email,
             onValueChange = {
-                id = it
+                email = it
                 onUserChanged(user.copy(id = it.text))
             }
         )
         Spacer(modifier = Modifier.height(8.dp))
         PasswordInput(
             label = { LabelMedium(text = R.string.register_password) },
-            value = password,
+            value = pwd,
             onValueChange = {
-                password = it
+                pwd = it
                 onUserChanged(user.copy(password = it.text))
             }
         )
@@ -208,10 +193,10 @@ private fun RegistrationPassword(
         ElevatedButton(
             onClick = {
                 vm.startRegisteringUser(
-                    email = id.text,
-                    password = password.text,
-                    firstName = firstName.text,
-                    lastName = lastName.text
+                    email = user.id,
+                    password = user.password,
+                    firstName = user.firstName,
+                    lastName = user.lastName
                 )
             },
             modifier = Modifier.height(50.dp)

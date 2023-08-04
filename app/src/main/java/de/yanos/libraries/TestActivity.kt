@@ -3,17 +3,23 @@ package de.yanos.libraries
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.filled.PhoneInTalk
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
 import de.yanos.core.ui.theme.AppTheme
 import de.yanos.core.ui.view.DynamicNavigationScreen
@@ -29,7 +35,7 @@ class TestActivity : ComponentActivity() {
             AppTheme(activity = this@TestActivity) { modifier, config ->
                 val navController = rememberNavController()
                 DynamicNavigationScreen(
-                    modifier = modifier,
+                    modifier = modifier.padding(top = 48.dp), // TODO: Check statusbar problem
                     config = config,
                     destinations = TEST_DESTINATIONS,
                     navController = navController
@@ -38,8 +44,7 @@ class TestActivity : ComponentActivity() {
                     TestNavHost(
                         modifier = contentModifier,
                         startRoute = TestRoutes.LOGIN,
-                        navController = navController,
-                        this@TestActivity
+                        navController = navController
                     )
                 }
             }
@@ -52,7 +57,6 @@ private fun TestNavHost(
     modifier: Modifier = Modifier,
     startRoute: String,
     navController: NavHostController,
-    activity: TestActivity
 ) {
     NavHost(
         modifier = modifier,
@@ -72,7 +76,7 @@ private fun TestNavHost(
             Text(text = TestRoutes.FOUR)
         }
         composable(TestRoutes.LOGIN) {
-            AuthView(onUserStateChange = {})
+            AuthView(modifier = Modifier.verticalScroll(rememberScrollState()), onUserStateChange = {})
         }
     }
 }
