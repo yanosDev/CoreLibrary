@@ -12,7 +12,7 @@ internal interface AuthRemoteSource {
     suspend fun register(user: RegisterUserByPassword): LoadState<User>
     suspend fun signIn(user: UserSignIn): LoadState<User>
     suspend fun signInGoogle(@Body user: UserSignInGoogle): LoadState<User>
-    suspend fun signOut(): LoadState<Boolean>
+    suspend fun signOut(user: User): LoadState<Boolean>
     suspend fun resetPassword(user: ResetPassword): LoadState<User>
     suspend fun token(user: User): LoadState<String>
 }

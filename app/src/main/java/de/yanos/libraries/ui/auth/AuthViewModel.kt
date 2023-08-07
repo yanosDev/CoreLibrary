@@ -1,6 +1,5 @@
 package de.yanos.libraries.ui.auth
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -31,7 +30,7 @@ class AuthViewModel @Inject constructor(
 
     fun checkUserAuthState() {
         viewModelScope.launch {
-            val user = repo.loadUser(appSettings.userId)
+            val user = repo.loadUserInformation(appSettings.userId)
             if (user != null) {
                 toProfile(user)
             }
@@ -44,20 +43,28 @@ class AuthViewModel @Inject constructor(
             val result = repo.signIn(email, password)
             (result as? LoadState.Data)?.data?.let { user ->
                 toProfile(user)
-            } ?: (result as? LoadState.Failure)?.e?.let { userState = AuthUIState.AuthFailed(it) }
+            } ?: (result as? LoadState.Failure)?.e?.let {
+                userState = AuthUIState.AuthFailed(it) {
+                    userState = AuthUIState.Login
+                }
+            }
         }
     }
 
     fun signOutUser() {
         viewModelScope.launch {
-            val result = repo.signOut()
+            val result = repo.signOut(appSettings.userId)
             (result as? LoadState.Data)?.data?.let { hasSucceeded ->
                 if (hasSucceeded) {
                     appSettings.userId = ""
                     user = User("", "", "", "")
                     userState = AuthUIState.Register
                 }
-            } ?: run { userState = AuthUIState.AuthFailed(Exception("Couldn't sign out")) }
+            } ?: run {
+                userState = AuthUIState.AuthFailed(Exception("Couldn't sign out")) {
+                    userState = AuthUIState.Profile
+                }
+            }
         }
     }
 
@@ -67,7 +74,9 @@ class AuthViewModel @Inject constructor(
             (result as? LoadState.Data)?.data?.let { user ->
                 userState = AuthUIState.PasswordRequested(user)
             } ?: (result as? LoadState.Failure)?.e?.let {
-                userState = AuthUIState.AuthFailed(it)
+                userState = AuthUIState.AuthFailed(it) {
+                    userState = AuthUIState.Login
+                }
             }
         }
     }
@@ -86,6 +95,6 @@ sealed interface AuthUIState {
     object Password : AuthUIState
     data class Registered(val user: User) : AuthUIState
     data class PasswordRequested(val user: User) : AuthUIState
-    data class AuthFailed(val error: Exception) : AuthUIState
+    data class AuthFailed(val error: Exception, val onDismiss: () -> Unit) : AuthUIState
     object SignedOut : AuthUIState
 }

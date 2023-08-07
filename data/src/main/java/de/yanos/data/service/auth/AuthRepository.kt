@@ -4,11 +4,11 @@ import de.yanos.data.model.user.User
 import de.yanos.data.util.LoadState
 
 interface AuthRepository {
-    suspend fun loadUser(id: String): User?
+    suspend fun loadUserInformation(id: String): User?
     suspend fun register(email: String, pwd: String, lastName: String, firstName: String): LoadState<User>
     suspend fun signIn(email: String, pwd: String): LoadState<User>
     suspend fun signInGoogle(id: String, token: String): LoadState<User>
-    suspend fun signOut(): LoadState<Boolean>
+    suspend fun signOut(id:String): LoadState<Boolean>
     suspend fun resetPassword(email: String, newPwd: String): LoadState<User>
     suspend fun token(id: String): LoadState<String>
 }

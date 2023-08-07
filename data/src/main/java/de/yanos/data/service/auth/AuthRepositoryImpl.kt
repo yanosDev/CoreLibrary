@@ -16,7 +16,7 @@ internal class AuthRepositoryImpl @Inject constructor(
     private val remote: AuthRemoteSource,
     @IODispatcher private val dispatcher: CoroutineDispatcher
 ) : AuthRepository {
-    override suspend fun loadUser(id: String): User? {
+    override suspend fun loadUserInformation(id: String): User? {
         return local.loadUser(id)
     }
 
@@ -50,8 +50,10 @@ internal class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signOut(): LoadState<Boolean> {
-        return withContext(dispatcher) { remote.signOut() }
+    override suspend fun signOut(id: String): LoadState<Boolean> {
+        return withContext(dispatcher) {
+            remote.signOut(local.loadUser(id) ?: return@withContext LoadState.Data(true))
+        }
     }
 
     override suspend fun resetPassword(email: String, newPwd: String): LoadState<User> {

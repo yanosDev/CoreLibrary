@@ -13,14 +13,17 @@ import de.yanos.core.utils.SignUpRequest
 import de.yanos.core.utils.isEmail
 import de.yanos.core.utils.isName
 import de.yanos.core.utils.isPassword
+import de.yanos.data.model.user.User
 import de.yanos.data.service.auth.AuthRepository
 import de.yanos.data.util.LoadState
+import de.yanos.libraries.util.prefs.AppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(
+    private val appSettings: AppSettings,
     private val repo: AuthRepository,
     @SignInRequest val signIn: BeginSignInRequest,
     @SignUpRequest val signUp: BeginSignInRequest,
@@ -56,9 +59,12 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 
-    private fun <T> setResult(result: LoadState<T>) {
-        state =
-            if ((result as? LoadState.Data)?.data != null) RegistrationState.RegistrationSuccessfull else RegistrationState.RegistrationFailed((result as? LoadState.Failure)?.e)
+    private fun setResult(result: LoadState<User>) {
+        state = (result as? LoadState.Data)?.data?.let { user ->
+            appSettings.userId = user.id
+
+            RegistrationState.RegistrationSuccessfull
+        } ?: RegistrationState.RegistrationFailed((result as? LoadState.Failure)?.e)
     }
 }
 

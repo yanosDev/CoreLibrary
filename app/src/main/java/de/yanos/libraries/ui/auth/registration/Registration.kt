@@ -185,7 +185,7 @@ private fun RegistrationPassword(
             label = { LabelMedium(text = R.string.register_password) },
             value = pwd,
             onValueChange = {
-                pwd = it
+                pwd = it.copy(text = it.text.replace(" ", ""))
                 onUserChanged(user.copy(password = it.text))
             }
         )

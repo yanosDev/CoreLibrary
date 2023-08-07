@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.yanos.core.R
+import de.yanos.core.ui.view.CustomDialog
 import de.yanos.libraries.ui.auth.registration.RegisterScreen
 import kotlinx.coroutines.launch
 
@@ -62,6 +63,21 @@ fun AuthView(
             onUserChanged = { vm.user = it },
             startLogin = { vm.userState = AuthUIState.Login }
         )
+
+        AuthUIState.Profile -> {
+            Text(text = "Hello Logged In User")
+            SignOffScreen(modifier = modifier, authExecutor = authExecutor)
+        }
+
+        is AuthUIState.AuthFailed -> {
+            CustomDialog(
+                title = stringResource(id = R.string.auth_error_title),
+                text = (vm.userState as AuthUIState.AuthFailed).error.message ?: "",
+                onConfirm = (vm.userState as AuthUIState.AuthFailed).onDismiss,
+                onDismiss = (vm.userState as AuthUIState.AuthFailed).onDismiss,
+                showCancel = false,
+            )
+        }
 
         else -> SignOffScreen(modifier = modifier, authExecutor = authExecutor)
     }

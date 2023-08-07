@@ -8,7 +8,6 @@ import de.yanos.data.model.user.User
 import de.yanos.data.model.user.UserSignIn
 import de.yanos.data.model.user.UserSignInGoogle
 import de.yanos.data.util.LoadState
-import de.yanos.data.util.toQueryMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
@@ -57,12 +56,15 @@ internal class AuthRemoteSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun signOut(): LoadState<Boolean> {
+    override suspend fun signOut(user: User): LoadState<Boolean> {
         return withContext(dispatcher) {
             catchException {
-                api.signOut().awaitResponse().let { response ->
-                    response.takeIf { it.isSuccessful }?.body()?.let { hasSucceeded ->
-                        LoadState.Data(data = hasSucceeded)
+                val tokenResult = token(user)
+                if (tokenResult is LoadState.Failure)
+                    return@catchException LoadState.Failure(tokenResult.e)
+                api.signOut((tokenResult as LoadState.Data).data).awaitResponse().let { response ->
+                    response.takeIf { it.isSuccessful }?.code()?.let { statusCode ->
+                        LoadState.Data(data = statusCode == 200)
                     } ?: LoadState.Failure(Exception(response.errorBody().toString()))
                 }
             }
@@ -84,7 +86,7 @@ internal class AuthRemoteSourceImpl @Inject constructor(
     override suspend fun token(user: User): LoadState<String> {
         return withContext(dispatcher) {
             catchException {
-                api.token(toQueryMap(user)).awaitResponse().let { response ->
+                api.token(user.toQueryMap()).awaitResponse().let { response ->
                     response.takeIf { it.isSuccessful }?.body()?.let { token ->
                         LoadState.Data(data = token)
                     } ?: LoadState.Failure(Exception(response.errorBody().toString()))
