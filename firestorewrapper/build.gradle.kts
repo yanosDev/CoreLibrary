@@ -35,21 +35,24 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":crashlog")))
     implementation(project(mapOf("path" to ":core")))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
 
+    //Firebase
     val firebaseBom = platform(libs.firebase.bom)
     implementation(firebaseBom)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+
+    //Logger
+    implementation(libs.timber)
 }
 
 publishing {

@@ -3,7 +3,7 @@ package de.yanos.core.utils
 import android.content.Context
 import kotlin.reflect.KProperty
 
-internal class PreferenceItem<T : Any> constructor(
+class PreferenceItem<T : Any> constructor(
     private val context: Context,
     private val preferenceFileName: String = "default",
     private val initializer: (() -> T)

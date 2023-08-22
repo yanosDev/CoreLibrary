@@ -108,7 +108,7 @@ private val AppTypography = Typography(
     ),
     bodyLarge = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Medium,
         fontStyle = FontStyle.Italic,
         fontSize = 16.sp,
         lineHeight = 24.0.sp,
@@ -116,7 +116,7 @@ private val AppTypography = Typography(
     ),
     bodyMedium = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.0.sp,
         letterSpacing = 0.2.sp,

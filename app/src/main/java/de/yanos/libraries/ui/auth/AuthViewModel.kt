@@ -5,91 +5,96 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.SignInCredential
-import de.yanos.firestorewrapper.domain.AuthRepository
-import de.yanos.firestorewrapper.domain.AuthResult
+import dagger.hilt.android.lifecycle.HiltViewModel
+import de.yanos.core.utils.GoogleClientId
+import de.yanos.data.model.user.User
+import de.yanos.data.service.auth.AuthRepository
+import de.yanos.data.util.LoadState
+import de.yanos.libraries.util.prefs.AppSettings
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-internal class AuthViewModel(
-    clientId: String,
-    private val authRepository: AuthRepository
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val appSettings: AppSettings,
+    private val repo: AuthRepository,
+    @GoogleClientId private val clientId: String
 ) : ViewModel() {
 
-    internal val signInRequest: BeginSignInRequest
-    internal val signUpRequest: BeginSignInRequest
-    var userIsLoggedIn: Boolean by mutableStateOf(false)
-    var userState: AuthResult by mutableStateOf(AuthResult.LoggedOut)
+    var user by mutableStateOf(User("", "", "", ""))
+    var userState: AuthUIState by mutableStateOf(AuthUIState.Register)
 
     init {
-        viewModelScope.launch {
-            userIsLoggedIn = authRepository.isLoggedIn()
-        }
-        signUpRequest = BeginSignInRequest.Builder()
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
-                    .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
-                    .setServerClientId(clientId)
-                    // Show all accounts on the device.
-                    .setFilterByAuthorizedAccounts(false)
-                    .build()
-            )
-            .build()
-        signInRequest = BeginSignInRequest.Builder()
-            .setPasswordRequestOptions(
-                BeginSignInRequest.PasswordRequestOptions.Builder()
-                    .setSupported(true)
-                    .build()
-            )
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
-                    .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
-                    .setServerClientId(clientId)
-                    // Only show accounts previously used to sign in.
-                    .setFilterByAuthorizedAccounts(true)
-                    .build()
-            )
-            // Automatically sign in when exactly one credential is retrieved.
-            .setAutoSelectEnabled(true)
-            .build()
+        checkUserAuthState()
     }
 
-    fun authUserByCredentials(googleCredential: SignInCredential) {
+    fun checkUserAuthState() {
         viewModelScope.launch {
-            val result = authRepository.loginWithCredential(googleCredential.googleIdToken)
-            setStateFromResult(result)
+            val user = repo.loadUserInformation(appSettings.userId)
+            if (user != null) {
+                toProfile(user)
+            }
+
         }
     }
 
     fun signInUser(email: String, password: String) {
         viewModelScope.launch {
-            val result = if (authRepository.userIsRegistered(email))
-                authRepository.loginPasswordUser(email, password)
-            else
-                authRepository.createPasswordUser(email, password)
-            setStateFromResult(result)
+            val result = repo.signIn(email, password)
+            (result as? LoadState.Data)?.data?.let { user ->
+                toProfile(user)
+            } ?: (result as? LoadState.Failure)?.e?.let {
+                userState = AuthUIState.AuthFailed(it) {
+                    userState = AuthUIState.Login
+                }
+            }
         }
     }
 
     fun signOutUser() {
         viewModelScope.launch {
-            authRepository.logOutUser()
-            userState = AuthResult.LoggedOut
-            userIsLoggedIn = false
+            val result = repo.signOut(appSettings.userId)
+            (result as? LoadState.Data)?.data?.let { hasSucceeded ->
+                if (hasSucceeded) {
+                    appSettings.userId = ""
+                    user = User("", "", "", "")
+                    userState = AuthUIState.Register
+                }
+            } ?: run {
+                userState = AuthUIState.AuthFailed(Exception("Couldn't sign out")) {
+                    userState = AuthUIState.Profile
+                }
+            }
         }
     }
 
     fun requestPasswordReset(email: String) {
         viewModelScope.launch {
-            val result = authRepository.sendPasswordResetEmail(email)
-            setStateFromResult(result)
+            val result = repo.resetPassword(email, "newPWD")
+            (result as? LoadState.Data)?.data?.let { user ->
+                userState = AuthUIState.PasswordRequested(user)
+            } ?: (result as? LoadState.Failure)?.e?.let {
+                userState = AuthUIState.AuthFailed(it) {
+                    userState = AuthUIState.Login
+                }
+            }
         }
     }
 
-    private fun setStateFromResult(result: AuthResult) {
-        userIsLoggedIn = result is AuthResult.SignIn
-        userState = result
+    private fun toProfile(user: User) {
+        this.user = user
+        appSettings.userId = user.id
+        userState = AuthUIState.Profile
     }
+}
+
+sealed interface AuthUIState {
+    object Profile : AuthUIState
+    object Login : AuthUIState
+    object Register : AuthUIState
+    object Password : AuthUIState
+    data class Registered(val user: User) : AuthUIState
+    data class PasswordRequested(val user: User) : AuthUIState
+    data class AuthFailed(val error: Exception, val onDismiss: () -> Unit) : AuthUIState
+    object SignedOut : AuthUIState
 }

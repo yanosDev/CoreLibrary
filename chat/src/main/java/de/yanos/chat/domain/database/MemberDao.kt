@@ -2,8 +2,8 @@ package de.yanos.chat.domain.database
 
 import androidx.room.Dao
 import de.yanos.chat.data.Member
-import de.yanos.core.base.BaseDao
+import de.yanos.data.database.dao.BaseDao
 
 @Dao
-interface MemberDao : BaseDao<Member> {
+interface MemberDao : de.yanos.data.database.dao.BaseDao<Member> {
 }

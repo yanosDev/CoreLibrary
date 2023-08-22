@@ -2,10 +2,6 @@
 
 package de.yanos.libraries.ui.auth
 
-import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,68 +21,68 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.auth.api.identity.SignInClient
-import de.yanos.core.ui.theme.SonayPreviews
-import de.yanos.crashlog.util.Clog
-import de.yanos.firestorewrapper.R
-import de.yanos.firestorewrapper.domain.AuthRepositoryBuilder
-import de.yanos.firestorewrapper.domain.AuthResult
+import androidx.hilt.navigation.compose.hiltViewModel
+import de.yanos.core.R
+import de.yanos.core.ui.view.CustomDialog
+import de.yanos.libraries.ui.auth.registration.RegisterScreen
 import kotlinx.coroutines.launch
 
 @Composable
-fun AuthView(modifier: Modifier = Modifier, clientId: String, oneTapClient: SignInClient, onUserStateChange: (AuthResult) -> Unit) {
+fun AuthView(
+    modifier: Modifier = Modifier,
+    vm: AuthViewModel = hiltViewModel(),
+    onUserStateChange: (AuthUIState) -> Unit
+) {
     val scope = rememberCoroutineScope()
-    val authViewModel = AuthViewModel(clientId, AuthRepositoryBuilder.builder().build())
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            authViewModel.authUserByCredentials(oneTapClient.getSignInCredentialFromIntent(result.data))
-        }
-    }
-    onUserStateChange(authViewModel.userState)
+    onUserStateChange(vm.userState)
     val authExecutor = { authAction: AuthAction ->
         scope.launch {
             when (authAction) {
                 is GoogleSignIn -> {
-                    oneTapClient.beginSignIn(authViewModel.signInRequest)
-                        .addOnSuccessListener { result ->
-                            launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
-                        }
-                        .addOnFailureListener {
-                            oneTapClient.beginSignIn(authViewModel.signUpRequest)
-                                .addOnSuccessListener { result ->
-                                    launcher.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
-                                }
-                                .addOnFailureListener { Clog.e("Registration Failed") }
-                        }
+
                 }
-                is EmailSignIn -> authViewModel.signInUser(authAction.email, authAction.password)
-                is SignOut -> authViewModel.signOutUser()
-                is PasswordReset -> authViewModel.requestPasswordReset(authAction.email)
+
+                is EmailSignIn -> vm.signInUser(authAction.email, authAction.password)
+                is SignOut -> {
+                    vm.signOutUser()
+                }
+
+                is PasswordReset -> vm.requestPasswordReset(authAction.email)
             }
         }
         Unit
     }
-    AuthScreen(
-        modifier = modifier,
-        isUserLoggedIn = authViewModel.userIsLoggedIn,
-        authExecutor,
-    )
+    when (vm.userState) {
+        AuthUIState.Register -> RegisterScreen(
+            modifier = modifier,
+            continueAfterRegistration = {
+                vm.checkUserAuthState()
+            },
+            user = vm.user,
+            onUserChanged = { vm.user = it },
+            startLogin = { vm.userState = AuthUIState.Login }
+        )
+
+        AuthUIState.Profile -> {
+            Text(text = "Hello Logged In User")
+            SignOffScreen(modifier = modifier, authExecutor = authExecutor)
+        }
+
+        is AuthUIState.AuthFailed -> {
+            CustomDialog(
+                title = stringResource(id = R.string.auth_error_title),
+                text = (vm.userState as AuthUIState.AuthFailed).error.message ?: "",
+                onConfirm = (vm.userState as AuthUIState.AuthFailed).onDismiss,
+                onDismiss = (vm.userState as AuthUIState.AuthFailed).onDismiss,
+                showCancel = false,
+            )
+        }
+
+        else -> SignOffScreen(modifier = modifier, authExecutor = authExecutor)
+    }
 }
 
-@SonayPreviews
-@Preview
-@Composable
-private fun AuthScreen(
-    modifier: Modifier = Modifier,
-    isUserLoggedIn: Boolean = true,
-    authExecutor: (AuthAction) -> Unit = { _ -> },
-) {
-    if (!isUserLoggedIn)
-        SignInScreen(modifier = modifier, authExecutor = authExecutor)
-    else SignOffScreen(modifier = modifier, authExecutor = authExecutor)
-}
 
 @Composable
 private fun SignInScreen(modifier: Modifier = Modifier, authExecutor: (AuthAction) -> Unit) {

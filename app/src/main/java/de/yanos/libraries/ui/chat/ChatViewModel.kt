@@ -7,7 +7,6 @@ import androidx.paging.cachedIn
 import de.yanos.chat.data.Message
 import de.yanos.chat.domain.repository.TextMessageCreationContent
 import de.yanos.chat.domain.usecase.PaginateMessagesUseCase
-import de.yanos.firestorewrapper.domain.StoreResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -22,8 +21,8 @@ class ChatViewModel(val chatId: String, val useCase: PaginateMessagesUseCase) : 
         if (task == null)
             task = viewModelScope.launch {
                 useCase.messagesHaveChanged(chatId).distinctUntilChanged().collectLatest { result ->
-                    if ((result as? StoreResult.Load)?.data?.isNotEmpty() == true)
-                        function()
+                    /*if ((result as? StoreResult.Load)?.data?.isNotEmpty() == true)
+                        function()*/
                 }
             }
     }

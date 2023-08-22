@@ -1,11 +1,11 @@
 package de.yanos.firestorewrapper.domain
 
 import com.google.firebase.auth.*
-import de.yanos.crashlog.util.Clog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 data class AuthConfig(var debugVerification: Boolean = false, var dispatcher: CoroutineDispatcher = Dispatchers.IO)
 
@@ -69,7 +69,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
             try {
                 !auth.fetchSignInMethodsForEmail(email).await().signInMethods.isNullOrEmpty()
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 false
             }
         }
@@ -93,7 +93,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
                     }
                 } ?: AuthResult.Failure("Anonymous login failed")
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 AuthResult.Failure("Anonymous login failed")
             }
         }
@@ -104,7 +104,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
             try {
                 linkAnonymousUser(EmailAuthProvider.getCredential(email, password))
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 AuthResult.Failure("Anonymous login with email password failed")
             }
         }
@@ -115,7 +115,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
             try {
                 linkAnonymousUser(GoogleAuthProvider.getCredential(idToken, null))
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 AuthResult.Failure("Anonymous login with credentials failed")
             }
         }
@@ -130,7 +130,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
                     }
                 } ?: AuthResult.Failure("Creating user failed")
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 AuthResult.Failure("Exception while email user creation")
             }
         }
@@ -145,7 +145,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
                     }
                 } ?: AuthResult.Failure("Login failed")
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 AuthResult.Failure("Exception while password login")
             }
         }
@@ -159,7 +159,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
                     AuthResult.SignIn(id = user.uid, email = user.email, name = user.displayName, provider = credential.provider)
                 } ?: AuthResult.Failure("Login failed")
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 AuthResult.Failure("Exception while credential login")
             }
         }
@@ -174,7 +174,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
                     else AuthResult.Failure(it.exception?.localizedMessage)
                 }
             } catch (e: FirebaseAuthException) {
-                Clog.e(e.localizedMessage ?: "")
+                Timber.e(e.localizedMessage ?: "")
                 AuthResult.Failure("Exception while Password reset")
             }
         }
@@ -189,7 +189,7 @@ internal class AuthRepositoryImpl(config: AuthConfig) : AuthRepository {
 
 sealed interface AuthResult {
     object LoggedOut : AuthResult
-    class SignIn(val id: String, val email: String?, val name: String?, val provider: String?) : AuthResult
+    class SignIn(val id: String, val email: String? = null, val name: String? = null, val provider: String? = null) : AuthResult
     class Failure(error: String?) : AuthResult
     object PasswordResetSent : AuthResult
 }

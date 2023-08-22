@@ -28,6 +28,7 @@ interface PaginateMessagesUseCase {
     ): StoreResult.Load<List<Message>>
 }
 
+@ExperimentalPagingApi
 internal class PaginateMessagesUseCaseImpl(
     private val database: RoomDatabase,
     private val messageDao: MessageDao,

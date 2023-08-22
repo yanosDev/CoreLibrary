@@ -123,7 +123,10 @@ private fun DynamicContent(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                content(Modifier.weight(1f))
+                content(
+                    Modifier
+                        .weight(1f)
+                )
                 AnimatedVisibility(visible = config.navigationType == NavigationType.BOTTOM) {
                     DynamicBottomBar(
                         route = route,

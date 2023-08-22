@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+include(":data")
+
+
 val snapshotVersion: String? = System.getenv("COMPOSE_SNAPSHOT_ID")
 pluginManagement {
     repositories {
@@ -24,6 +27,6 @@ dependencyResolutionManagement {
 rootProject.name = "YanosLibraries"
 include(":app")
 include(":core")
-include(":firestorewrapper")
-include(":crashlog")
 include(":chat")
+include(":domain")
+include(":firestorewrapper")

@@ -2,7 +2,6 @@ package de.yanos.firestorewrapper.domain
 
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
-import de.yanos.crashlog.util.Clog
 import de.yanos.firestorewrapper.util.CollectionPathBuilder
 import de.yanos.firestorewrapper.util.Condition
 import de.yanos.firestorewrapper.util.DatabasePath
@@ -13,6 +12,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -88,7 +88,7 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                 store.create(path, values)
                     .addOnSuccessListener { cont.resume(StoreResult.Success) }
                     .addOnFailureListener {
-                        Clog.e(it.stackTraceToString())
+                        Timber.e(it.stackTraceToString())
                         cont.resume(StoreResult.Failure(it.localizedMessage))
                     }
             }
@@ -108,7 +108,7 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                         )
                     }
                     .addOnFailureListener {
-                        Clog.e(it.stackTraceToString())
+                        Timber.e(it.stackTraceToString())
                         cont.resume(StoreResult.Failure(it.localizedMessage))
                     }
             }
@@ -128,7 +128,7 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                         )
                     }
                     .addOnFailureListener {
-                        Clog.e(it.stackTraceToString())
+                        Timber.e(it.stackTraceToString())
                         cont.resume(StoreResult.Failure(it.localizedMessage))
                     }
             }
@@ -206,7 +206,7 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                 store.update(path, values)
                     .addOnSuccessListener { cont.resume(StoreResult.Success) }
                     .addOnFailureListener {
-                        Clog.e(it.stackTraceToString())
+                        Timber.e(it.stackTraceToString())
                         cont.resume(StoreResult.Failure(it.localizedMessage))
                     }
             }
@@ -221,7 +221,7 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                 store.delete(path)
                     .addOnSuccessListener { cont.resume(StoreResult.Success) }
                     .addOnFailureListener {
-                        Clog.e(it.stackTraceToString())
+                        Timber.e(it.stackTraceToString())
                         cont.resume(StoreResult.Failure(it.localizedMessage))
                     }
             }
@@ -256,7 +256,7 @@ private class DatabaseRepositoryImpl(isPersistenceEnabled: Boolean, cd: Coroutin
                         )
                     }
                     .addOnFailureListener {
-                        Clog.e(it.stackTraceToString())
+                        Timber.e(it.stackTraceToString())
                         cont.resume(errorLoad)
                     }
             }
@@ -295,7 +295,7 @@ private fun Query.buildConditions(conditions: List<Condition>): Query {
                 is Condition.StartAt -> query.startAt(condition.value)
             }
     } catch (e: Exception) {
-        Clog.e(e.stackTraceToString())
+        Timber.e(e.stackTraceToString())
     }
     return query
 }

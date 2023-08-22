@@ -1,10 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">YanosLibraries</string>
+    <!-- General purposed -->
+    <string name="app_email">Email</string>
+    <string name="app_error_email">This is not a valid mail.</string>
+    <string name="app_error_name">Name is invalid.</string>
+    <string name="app_error_pwd">Password has to be at least 8 characters.</string>
+    <string name="app_failure">Failure</string>
+    <string name="app_first_name">First name</string>
+    <string name="app_last_name">Last name</string>
+    <string name="app_password">Password</string>
+    <string name="app_google_login">Sign in with Google</string>
+    <string name="app_error">Failure</string>
+
+    <!-- Auth -->
+    <string name="auth_error_title">@string/app_error</string>
+    <!-- Registration -->
+    <string name="register_account">Create an Account</string>
+    <string name="register_new_user">Start Registration</string>
+    <string name="register_email">@string/app_email</string>
+    <string name="register_error_server_title">@string/app_failure</string>
+    <string name="register_error_invalid_title">Invalid Data</string>
+    <string name="register_error_server_text">Registration has failed. Please try it again.</string>
+    <string name="register_error_invalid_text">Please check your data. Some of them are invalid.</string>
+    <string name="register_error_close">Close</string>
+    <string name="register_first_name">@string/app_first_name</string>
+    <string name="register_google">@string/app_google_login</string>
+    <string name="register_intro">Welcome to my Library</string>
+    <string name="register_last_name">@string/app_last_name</string>
+    <string name="register_password">@string/app_password</string>
+    <string name="register_or">Or</string>
+    <string name="register_sign_in">Sign In</string>
+    <string name="register_to_login_desc">Already registered? Sign in here: </string>
 
     <string name="fab_add_note">Add</string>
     <string name="message_hint">Your Message here</string>
     <string name="message_send">Send</string>
     <string name="emojis_label">Emojis</string>
     <string name="stickers_label">Stickers</string>
+
+    <string name="btn_login_google">Sign in with Google</string>
+    <string name="btn_logout">Sign Out</string>
+    <string name="welcome">Welcome Back</string>
+    <string name="signIn_to_continue">Sign in to continue</string>
+    <string name="signIn_alternative">Or, sign in with:</string>
+    <string name="name">Username</string>
+    <string name="password">Password</string>
+    <string name="signIn">Sign In Now</string>
+    <string name="forgot_password">Forgot password?</string>
 </resources>
