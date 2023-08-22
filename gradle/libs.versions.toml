@@ -58,7 +58,7 @@ secrets = "2.0.1"
 targetSdk = "33"
 timber-version = "5.0.1"
 versionCatalog = "0.8.0"
-yanos-lib = "0.1.38"
+yanos-lib = "0.1.39"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
