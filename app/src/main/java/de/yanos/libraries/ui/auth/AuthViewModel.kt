@@ -21,7 +21,7 @@ class AuthViewModel @Inject constructor(
     @GoogleClientId private val clientId: String
 ) : ViewModel() {
 
-    var user by mutableStateOf(User("", "", "", ""))
+    var user: User by mutableStateOf(User("", "", "", ""))
     var userState: AuthUIState by mutableStateOf(AuthUIState.Register)
 
     init {
@@ -30,7 +30,7 @@ class AuthViewModel @Inject constructor(
 
     fun checkUserAuthState() {
         viewModelScope.launch {
-            val user = repo.loadUserInformation(appSettings.userId)
+            val user = repo.loadUser(appSettings.userId)
             if (user != null) {
                 toProfile(user)
             }
@@ -43,28 +43,26 @@ class AuthViewModel @Inject constructor(
             val result = repo.signIn(email, password)
             (result as? LoadState.Data)?.data?.let { user ->
                 toProfile(user)
-            } ?: (result as? LoadState.Failure)?.e?.let {
-                userState = AuthUIState.AuthFailed(it) {
-                    userState = AuthUIState.Login
-                }
-            }
+            } ?: (result as? LoadState.Failure)?.e?.let { userState = AuthUIState.AuthFailed(it) }
         }
     }
 
     fun signOutUser() {
         viewModelScope.launch {
-            val result = repo.signOut(appSettings.userId)
+            appSettings.userId = ""
+            user = User("", "", "", "")
+            userState = AuthUIState.Register
+            //TODO: Fix remote logOut issue
+            /*
+            val result = repo.signOut()
             (result as? LoadState.Data)?.data?.let { hasSucceeded ->
                 if (hasSucceeded) {
                     appSettings.userId = ""
                     user = User("", "", "", "")
                     userState = AuthUIState.Register
                 }
-            } ?: run {
-                userState = AuthUIState.AuthFailed(Exception("Couldn't sign out")) {
-                    userState = AuthUIState.Profile
-                }
-            }
+            } ?: run { userState = AuthUIState.AuthFailed(Exception("Couldn't sign out")) }
+            */
         }
     }
 
@@ -74,9 +72,7 @@ class AuthViewModel @Inject constructor(
             (result as? LoadState.Data)?.data?.let { user ->
                 userState = AuthUIState.PasswordRequested(user)
             } ?: (result as? LoadState.Failure)?.e?.let {
-                userState = AuthUIState.AuthFailed(it) {
-                    userState = AuthUIState.Login
-                }
+                userState = AuthUIState.AuthFailed(it)
             }
         }
     }
@@ -95,6 +91,6 @@ sealed interface AuthUIState {
     object Password : AuthUIState
     data class Registered(val user: User) : AuthUIState
     data class PasswordRequested(val user: User) : AuthUIState
-    data class AuthFailed(val error: Exception, val onDismiss: () -> Unit) : AuthUIState
+    data class AuthFailed(val error: Exception) : AuthUIState
     object SignedOut : AuthUIState
 }
