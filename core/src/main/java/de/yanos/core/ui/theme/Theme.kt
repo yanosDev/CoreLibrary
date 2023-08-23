@@ -179,6 +179,7 @@ fun AppTheme(
 fun AppTheme(
     activity: ComponentActivity,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
+    typography: Typography = AppTypography,
     content: @Composable (Modifier, ScreenConfig) -> Unit
 ) {
     WindowCompat.setDecorFitsSystemWindows(activity.window, false)
@@ -190,7 +191,6 @@ fun AppTheme(
             dynamicLightColorScheme(LocalContext.current)
         }
     val systemUiController = rememberSystemUiController()
-    val typography = AppTypography
     MaterialTheme(
         colorScheme = colors,
         typography = typography,

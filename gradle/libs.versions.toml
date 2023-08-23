@@ -54,6 +54,7 @@ robolectric = "4.9.2"
 rome = "1.18.0"
 room = "2.5.1"
 secrets = "2.0.1"
+splash = "1.0.0"
 # @keep
 targetSdk = "33"
 timber-version = "5.0.1"
@@ -158,6 +159,7 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 rometools-modules = { module = "com.rometools:rome-modules", version.ref = "rome" }
 rometools-rome = { module = "com.rometools:rome", version.ref = "rome" }
 secrets-gradlePlugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secrets" }
+splash = { module = "androidx.core:core-splashscreen", version.ref = "splash" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber-version" }
 
 [plugins]
